@@ -2,7 +2,6 @@
 # implemented as RPC server
 from twisted.web import xmlrpc
 from twisted.python import log
-from optparse import OptionParser
 import subprocess
 import config
 
@@ -10,11 +9,15 @@ import config
 class WatchDogServer(xmlrpc.XMLRPC):
     proc = None
 
+    def __init__(self, port, **kwargs):
+        xmlrpc.XMLRPC.__init__(self, **kwargs)
+        self.port = port
+
     def xmlrpc_joinServer(self):
         if self.proc is not None:
             return xmlrpc.Fault(1, "Server already started.")
         try:
-            self.proc = subprocess.Popen(["python2", "server.py"])
+            self.proc = subprocess.Popen(["python2", "server.py", "-p", str(self.port + 1)])
             return 0
         except Exception as e:
             return xmlrpc.Fault(2, str(e))
@@ -33,6 +36,7 @@ class WatchDogServer(xmlrpc.XMLRPC):
 if __name__ == '__main__':
     from twisted.internet import reactor
     from twisted.web import server
+    from optparse import OptionParser
     parser = OptionParser(
         usage="Serverside watchdog for receiving master program instructions.")
     parser.add_option(
@@ -45,7 +49,7 @@ if __name__ == '__main__':
         help="the port watchdog will listen to.")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
-    watchdog = WatchDogServer()
-    reactor.listenTCP(options.port, server.Site(watchdog))
-    log.msg("WatchDog Server Running on {}.".format(options.port))
+    watchdog = WatchDogServer(options.port)
+    reactor.listenTCP(watchdog.port, server.Site(watchdog))
+    log.msg("WatchDog Server Running on {}.".format(watchdog.port))
     reactor.run()
