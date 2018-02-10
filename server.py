@@ -1,6 +1,10 @@
 # Purpose: only do messaging between server and client
+from twisted.web import xmlrpc, server
+from twisted.python import log
+import config
 
-class Server:
+
+class ServerProxy():
     def __init__(self, serverId):
         pass
 
@@ -10,7 +14,38 @@ class Server:
     def sendMessage(self):
         pass
 
+
+class Server(xmlrpc.XMLRPC):
+
+    def __init__(self, port, **kwargs):
+        xmlrpc.XMLRPC.__init__(self, **kwargs)
+        self.port = port
+
+    def xmlrpc_stabilize(self):
+        log.msg("Fake Statbilizing...")
+        return 0
+
+    def xmlrpc_printStore(self):
+        log.msg("Fake printStore...")
+        return 0
+
+
 if __name__ == '__main__':
-    print("server is running")
-    while True:
-        pass
+    from twisted.internet import reactor, endpoints
+    from optparse import OptionParser
+    parser = OptionParser(
+        usage="The storage server instance, should be called by watchdog.")
+    parser.add_option(
+        "-p",
+        "--port",
+        metavar="PORT_NUM",
+        type="int",
+        dest="port",
+        help="the port server will listen to.")
+    (options, args) = parser.parse_args()
+    log.startLogging(config.LOG_FILE)
+    s = Server(port=options.port)
+    endpoint = endpoints.TCP4ServerEndpoint(reactor, s.port)
+    endpoint.listen(server.Site(s))
+    log.msg("Server Running on {}.".format(s.port))
+    reactor.run()
