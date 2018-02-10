@@ -2,9 +2,9 @@
 # implemented as RPC server
 from twisted.web import xmlrpc
 from twisted.python import log
+from optparse import OptionParser
 import subprocess
 import config
-log.startLogging(config.LOG_FILE)
 
 
 class WatchDogServer(xmlrpc.XMLRPC):
@@ -33,8 +33,19 @@ class WatchDogServer(xmlrpc.XMLRPC):
 if __name__ == '__main__':
     from twisted.internet import reactor
     from twisted.web import server
+    parser = OptionParser(
+        usage="Serverside watchdog for receiving master program instructions.")
+    parser.add_option(
+        "-p",
+        "--port",
+        metavar="PORT_NUM",
+        default=config.WATCHDOG_PORT,
+        type="int",
+        dest="port",
+        help="the port watchdog will listen to.")
+    (options, args) = parser.parse_args()
+    log.startLogging(config.LOG_FILE)
     watchdog = WatchDogServer()
-    port = config.WATCHDOG_PORT
-    reactor.listenTCP(port, server.Site(watchdog))
-    log.msg("WatchDog Server Running on {}.".format(port))
+    reactor.listenTCP(options.port, server.Site(watchdog))
+    log.msg("WatchDog Server Running on {}.".format(options.port))
     reactor.run()
