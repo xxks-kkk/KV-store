@@ -17,9 +17,13 @@ class ServerProxy():
 
 class Server(xmlrpc.XMLRPC):
 
-    def __init__(self, port, **kwargs):
+    def __init__(self, serverId, **kwargs):
         xmlrpc.XMLRPC.__init__(self, **kwargs)
-        self.port = port
+        if serverId not in config.ADDR_PORT:
+            raise Exception("Node not exist")
+        _, self.port, kind = config.ADDR_PORT.get(serverId)
+        if kind != "server":
+            raise Exception("Try to start a server on client port")
 
     def xmlrpc_stabilize(self):
         log.msg("Fake Statbilizing...")
@@ -36,15 +40,15 @@ if __name__ == '__main__':
     parser = OptionParser(
         usage="The storage server instance, should be called by watchdog.")
     parser.add_option(
-        "-p",
-        "--port",
+        "-i",
+        "--serverId",
         metavar="PORT_NUM",
-        type="int",
-        dest="port",
-        help="the port server will listen to.")
+        type="string",
+        dest="id",
+        help="server id")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
-    s = Server(port=options.port)
+    s = Server(serverId=options.id)
     endpoint = endpoints.TCP4ServerEndpoint(reactor, s.port)
     endpoint.listen(server.Site(s))
     log.msg("Server Running on {}.".format(s.port))
