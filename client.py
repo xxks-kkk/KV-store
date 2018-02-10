@@ -2,7 +2,7 @@ from twisted.web import xmlrpc, server
 from twisted.python import log
 import subprocess
 import config
-log.startLogging(config.LOG_FILE)
+from optparse import OptionParser
 
 
 class ClientProxy:
@@ -33,9 +33,9 @@ class ClientServer(xmlrpc.XMLRPC):
     It's actually a xmlrpc server for accepting master scripts' procedure calls
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, port, **kwargs):
         xmlrpc.XMLRPC.__init__(self, **kwargs)
-        self.port = config.CLIENT_PORT
+        self.port = port
         self.proxy = ClientProxy()
 
     def xmlrpc_joinClient(self, serverId):
@@ -66,7 +66,19 @@ class ClientServer(xmlrpc.XMLRPC):
 
 if __name__ == "__main__":
     from twisted.internet import reactor, endpoints
-    client = ClientServer()
+    parser = OptionParser(
+        usage="Client interface for receiving master program instructions via xmlrpc.")
+    parser.add_option(
+        "-p",
+        "--port",
+        metavar="PORT_NUM",
+        default=config.CLIENT_PORT,
+        type="int",
+        dest="port",
+        help="the port client will listen to.")
+    (options, args) = parser.parse_args()
+    log.startLogging(config.LOG_FILE)
+    client = ClientServer(options.port)
     endpoint = endpoints.TCP4ServerEndpoint(reactor, client.port)
     endpoint.listen(server.Site(client))
     log.msg("Client Running on {}.".format(client.port))
