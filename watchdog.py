@@ -33,7 +33,6 @@ class WatchDogServer(xmlrpc.XMLRPC):
 if __name__ == '__main__':
     from twisted.internet import reactor
     from twisted.web import server
-    import json
     watchdog = WatchDogServer()
     port = config.WATCHDOG_PORT
     reactor.listenTCP(port, server.Site(watchdog))
