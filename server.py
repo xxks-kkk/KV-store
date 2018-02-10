@@ -9,3 +9,8 @@ class Server:
 
     def sendMessage(self):
         pass
+
+if __name__ == '__main__':
+    print("server is running")
+    while True:
+        pass
