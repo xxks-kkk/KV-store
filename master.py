@@ -1,33 +1,74 @@
-def joinServer(id):
+from SimpleXMLRPCServer import SimpleXMLRPCServer
+import argparse
+import config
+
+def joinServer(dogs, clients, servers, arg):
+    dogs[int(arg[1])].joinServer()
+
+def killServer(dogs, clients, servers, arg):
+    dogs[int(arg[1])].killServer()
+
+def joinClient(dogs, clients, servers, arg):
+    clients[int(arg[1]) % CLIENT_COUNT].joinServer(int(arg[2]))
     pass
 
-def killServer(id):
-    pass
+def breakConnection(dogs, clients, servers, arg):
+    # if break between client and server, send to client, 
+    # elseif between 2 servers, send to first server to execute
+    id1, id2 = int(arg[1]), int(arg[2])
+    if id1 < SERVER_COUNT and id2 < SERVER_COUNT:
+        servers[id1].breakConnection(id2)
+    else:
+        clients[max(id1, id2) % CLIENT_COUNT].breakConnection(min(id1, id2))
 
-def joinClient(clientId, serverId):
-    pass
+def createConnection(dogs, clients, servers, arg):
+    id1, id2 = int(arg[1]), int(arg[2])
+    if id1 < SERVER_COUNT and id2 < SERVER_COUNT:
+        servers[id1].createConnection(id2)
+    else:
+        clients[max(id1, id2) % CLIENT_COUNT].createConnection(min(id1, id2))
 
-def breakConnection(id1, id2):
-    pass
+def stablize(dogs, clients, servers, arg):
+    for server in servers:
+        server.stablize()
 
-def createConnection(id1, id2):
-    pass
+def printStore(dogs, clients, servers, arg):
+    servers[int(arg[1])].printStore()
 
-def stablize():
-    pass
+def put(dogs, clients, servers, arg):
+    # what happens if there are ' ' in key and value
+    clients[int(arg[1]) % CLIENT_COUNT].put(arg[2], arg[3])
 
-def printStore(id):
-    pass
-
-def put(clientId, key, val):
-    pass
-
-def get(clientId, key):
-    pass
+def get(dogs, clients, servers, arg):
+    clients[int(arg[1]) % CLIENT_COUNT].get(arg[2])
 
 if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
     #    (NOTE: connect with watchdogs before servers)
     # 2. Wait for the Samantha's command
-    pass
+    dogs, clients, servers = [], [], []
+    for i in range(SERVER_COUNT):
+        dogs.append( xmlrpclib.ServerProxy(WATCHDOG_IP_LIST + WATCHDOG_PORT))
+        clients.append(xmlrpclib.ServerProxy(CLIENT_IP_LIST+ CLIENT_PORT))
+        servers.append(xmlrpclib.ServerProxy(WATCHDOG_IP_LIST + SERVER_PORT))
 
+    command2func = {
+                    'joinServer' : joinServer,
+                    'killServer' : killServer,
+                    'joinClient' : joinClient,
+                    'breakConnection' : breakConnection,
+                    'createConnection' : createConnection,
+                    'stablize' : stablize,
+                    'printStore' : printStore,
+                    'put' : put,
+                    'get' : get
+    }
+
+    try:
+        while True:
+            input = sys.stdin.readline().strip('\n')
+            arg = input.split(' ')
+            func = command2func.get(arg[0], 'nothing')
+            func(dogs, clients, servers, arg)
+    except:
+        pass
