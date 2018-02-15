@@ -1,15 +1,17 @@
 # Purpose: only do messaging between server and client
 from twisted.web import xmlrpc, server
 from twisted.python import log
+from model import Model
 import config
 
 
 class ServerProxy():
     timeStamp = None
     def __init__(self, serverId):
-        pass
+        self.serverId = serverId
+        self.model = Model(self)
 
-    def onMessageReceived(self):
+    def onMessageReceived(self, message):
         pass
 
     def sendMessage(self, message):
@@ -22,6 +24,7 @@ class ServerProxy():
         }
         this method adds "senderId" and "timeStamp".
         """
+        # test if message contains precondition
         pass
 
 
