@@ -17,3 +17,9 @@ ADDR_PORT = {
     "8": ("localhost", 9004, "client"),
     "9": ("localhost", 9005, "client"),
 }
+
+localhost =  "127.0.0.1"
+SERVER_COUNT = 5
+CLIENT_COUNT = 5
+WATCHDOG_IP_LIST = [localhost] * SERVER_COUNT
+CLIENR_IP_LIST = [localhost] * CLIENT_COUNT
