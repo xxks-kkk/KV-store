@@ -1,6 +1,6 @@
 # Purpose: vector clock
 
-def isHappenBefore(c1, c2):
+def isHappenBefore(serverId1, c1, serverId2, c2):
     for i in range(c1.server_num):
         if c1.vector_clock[i] < c2.vector_clock[i]:
             c1.vector_clock[i] = c2.vector_clock[i] 

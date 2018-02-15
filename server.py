@@ -5,13 +5,23 @@ import config
 
 
 class ServerProxy():
+    timeStamp = None
     def __init__(self, serverId):
         pass
 
     def onMessageReceived(self):
         pass
 
-    def sendMessage(self):
+    def sendMessage(self, message):
+        """
+        precondition{
+        "receiverId":,
+        "messageId":,
+        "Method":,
+        "Payload":, 
+        }
+        this method adds "senderId" and "timeStamp".
+        """
         pass
 
 
