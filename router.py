@@ -31,6 +31,7 @@ class Router:
         return (self.id , self.routeMat)
 
     def nextStop(self, receiveId):
+        receiveId = int(receiveId)
         if len(self.routeMat[receiveId]):
             return self.routeMat[receiveId][0]
         else:
@@ -43,6 +44,7 @@ class Router:
         if it is not connected, it is used for connect as neighbour
         '''
         # neighbours[serverId] = val
+        serverId = int(serverId)
         if val:
             self.routeMat[serverId] = [serverId]
         else:
