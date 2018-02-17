@@ -1,7 +1,10 @@
 import sys
 
-WATCHDOG_PORT = 6666
-CLIENT_PORT = 8888
+# WATCHDOG_PORT = 6666
+WATCHDOG_PORT = [6666, 6667, 6668, 6669, 6670]
+# CLIENT_PORT = 8888
+CLIENT_PORT = [9001, 9002, 9003, 9004, 9005]
+SERVER_PORT = [8000, 8001, 8002, 8003, 8004]
 LOG_FILE = sys.stdout
 file_dict_dir = "dict/"
 
@@ -18,8 +21,7 @@ ADDR_PORT = {
     "9": ("localhost", 9005, "client"),
 }
 
-localhost =  "127.0.0.1"
 SERVER_COUNT = 5
 CLIENT_COUNT = 5
-WATCHDOG_IP_LIST = [localhost] * SERVER_COUNT
-CLIENR_IP_LIST = [localhost] * CLIENT_COUNT
+WATCHDOG_IP_LIST = ["localhost"] * SERVER_COUNT
+CLIENR_IP_LIST = ["localhost"] * CLIENT_COUNT
