@@ -23,6 +23,8 @@ class ServerProxy(object):
         protocol.remote_id = id
         protocol.factory.peers[id] = protocol
         protocol.factory.proxy.router.neighbourChange(id, True)
+
+        self.timeStamp.incrementClock(self.serverId)
         protocol.sendData({
             "Method": "Hello",
             "ReceiverId": id,
@@ -42,11 +44,12 @@ class ServerProxy(object):
         if message["ReceiverId"] != self.serverId:
             self.sendMessage(message)
         senderId = message["SenderId"]
-        self.timeStamp.onMessageReceived(message["SenderId"],
+        self.timeStamp.onMessageReceived(self.serverId,
                                          Clock(message["TimeStamp"]))
+        if not self.lc_call.running:
+            self.lc_call.start(0.5)
         if message["Method"] == "Hello":
-            if not self.lc_call.running:
-                self.lc_call.start(0.5)
+            pass
         elif message["Method"] == "Put":
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
@@ -88,6 +91,7 @@ class ServerProxy(object):
         this method adds "senderId" and "timeStamp".
         """
         # test if message contains precondition
+        self.timeStamp.incrementClock(self.serverId)
         message["TimeStamp"] = self.timeStamp.vector_clock
         message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
