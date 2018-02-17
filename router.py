@@ -35,7 +35,7 @@ class Router:
         if len(self.routeMat[receiveId]):
             return self.routeMat[receiveId][0]
         else:
-            return False
+            return None
 
     def neighbourChange(self, serverId, val):
         '''
