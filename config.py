@@ -4,6 +4,7 @@ WATCHDOG_PORT = 6666
 CLIENT_PORT = 8888
 LOG_FILE = sys.stdout
 file_dict_dir = "dict/"
+NUM_SERVER = 5
 
 ADDR_PORT = {
     "0": ("localhost", 8000, "server"),
