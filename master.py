@@ -48,9 +48,9 @@ if __name__ == "__main__":
     # 2. Wait for the Samantha's command
     dogs, clients, servers = [], [], []
     for i in range(SERVER_COUNT):
-        dogs.append( xmlrpclib.ServerProxy(WATCHDOG_IP_LIST + WATCHDOG_PORT))
-        clients.append(xmlrpclib.ServerProxy(CLIENT_IP_LIST+ CLIENT_PORT))
-        servers.append(xmlrpclib.ServerProxy(WATCHDOG_IP_LIST + SERVER_PORT))
+        dogs.append( xmlrpclib.ServerProxy('http://' + WATCHDOG_IP_LIST[i] + ':' + WATCHDOG_PORT[i]))
+        clients.append(xmlrpclib.ServerProxy('http://' + CLIENT_IP_LIST[i]+ ':' + CLIENT_PORT[i]))
+        servers.append(xmlrpclib.ServerProxy('http://' + WATCHDOG_IP_LIST[i] + ':' + SERVER_PORT[i]))
 
     command2func = {
                     'joinServer' : joinServer,
