@@ -17,12 +17,19 @@ class FileDictionary:
         self.filepath = os.path.join(config.file_dict_dir, self.filename)
         self.data = self.load() if os.path.isfile(self.filepath) else {}
 
-    def put(self, key, value, timestamp):
-        item = {
-            'key': key,
-            'val': value,
-            'time': timestamp
-        }
+    def put(self, item):
+        """
+        The structure of item:
+            item = {
+                'messageId': messageId,
+                'key': key,
+                'value': value,
+                'serverId': serverId,
+                'timeStamp': timestamp
+            }
+        :param item: a dictionary with "key", "val", "serverId", "time"
+        :return: None
+        """
         self.data[key] = item
 
     def get(self, key):
@@ -60,7 +67,12 @@ if __name__ == "__main__":
     # Test
     fileDict = FileDictionary(1)
     for key, timestamp in zip(range(num_records), timestamp_list):
-        fileDict.put(key, key+1, timestamp.strftime("%m/%d/%y %H:%M"))
+        item = {}
+        item['key'] = key
+        item['value'] = key+1
+        item['timeStamp'] = timestamp.strftime("%m/%d/%y %H:%M")
+        item['serverId'] = 1
+        fileDict.put(item)
     print(fileDict.get(0))
     fileDict.dump()
     data = fileDict.load()

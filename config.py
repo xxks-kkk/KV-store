@@ -7,6 +7,7 @@ CLIENT_PORT = [9001, 9002, 9003, 9004, 9005]
 SERVER_PORT = [8000, 8001, 8002, 8003, 8004]
 LOG_FILE = sys.stdout
 file_dict_dir = "dict/"
+NUM_SERVER = 5
 
 ADDR_PORT = {
     "0": ("localhost", 8000, "server"),
