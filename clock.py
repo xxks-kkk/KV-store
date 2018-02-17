@@ -2,6 +2,7 @@
 
 import config
 import copy
+
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
     for i in range(config.NUM_SERVER):
