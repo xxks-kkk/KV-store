@@ -20,7 +20,7 @@ class Clock:
     # the numbers of server in the system
     vector_clock = []
 
-    def __init__(self, vc):
+    def __init__(self, vc = None):
         if vc:
             self.vector_clock = copy.copy(vc)
         else:
