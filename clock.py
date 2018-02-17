@@ -3,7 +3,7 @@ from config import NUM_SERVER
 
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
-    for i in range(NUM_SERVER):
+    for i in range(config.NUM_SERVER):
         if c1.vector_clock[i] < c2.vector_clock[i]:
             c1.vector_clock[i] = c2.vector_clock[i]
     if all([i <= j for i, j in zip(c1.vector_clock, c2.vector_clock)]):
@@ -19,13 +19,13 @@ class Clock:
     vector_clock = []
 
     def __init__(self):
-        self.vector_clock = [0] * NUM_SERVER
+        self.vector_clock = [0] * config.NUM_SERVER
 
     def incrementClock(self, id):
         self.vector_clock[id] += 1
 
     def onMessageReceived(self, id, c1):
-        for i in range(NUM_SERVER):
+        for i in range(config.NUM_SERVER):
             self.vector_clock[i] = max(self.vector_clock[i],
                                        c1.vector_clock[i])
         self.vector_clock[id] += 1
