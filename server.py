@@ -19,7 +19,10 @@ class ServerProxy(object):
         self.lc_call = LoopingCall(self.gossip)
 
     def greeting(self, protocol, id):
+        # setup connection between factory and protocol
         protocol.remote_id = id
+        protocol.factory.peers[id] = protocol
+        protocol.factory.proxy.router.neighbourChange(id, True)
         protocol.sendData({
             "Method": "Hello",
             "ReceiverId": id,
@@ -31,8 +34,8 @@ class ServerProxy(object):
         for peer in self.factory.peers.keys():
             self.sendMessage({
                 "Method": "Gossip",
-                "ReceiverId": id,
-                "Payload": router.getPayload()
+                "ReceiverId": peer,
+                "Payload": self.router.getPayload()
             })
 
     def messageReceived(self, message):
@@ -42,7 +45,8 @@ class ServerProxy(object):
         self.timeStamp.onMessageReceived(message["SenderId"],
                                          Clock(message["TimeStamp"]))
         if message["Method"] == "Hello":
-            self.lc_call.start(0.5)
+            if not self.lc_call.running:
+                self.lc_call.start(0.5)
         elif message["Method"] == "Put":
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
@@ -84,10 +88,10 @@ class ServerProxy(object):
         this method adds "senderId" and "timeStamp".
         """
         # test if message contains precondition
-        message["timeStamp"] = self.timeStamp.vector_clock
-        message["senderId"] = self.serverId
-        nextStop = self.router.nextStop(message["receiverId"])
-        if nextStop is False:
+        message["TimeStamp"] = self.timeStamp.vector_clock
+        message["SenderId"] = self.serverId
+        nextStop = self.router.nextStop(message["ReceiverId"])
+        if nextStop is None:
             log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
         self.factory.peers[nextStop].sendData(message)
