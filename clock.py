@@ -2,6 +2,7 @@
 
 import config
 import copy
+
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
     for i in range(config.NUM_SERVER):
@@ -19,7 +20,7 @@ class Clock:
     # the numbers of server in the system
     vector_clock = []
 
-    def __init__(self, vc):
+    def __init__(self, vc = None):
         if vc:
             self.vector_clock = copy.copy(vc)
         else:
