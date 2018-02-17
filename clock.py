@@ -1,5 +1,5 @@
 # Purpose: vector clock
-from config import NUM_SERVER
+import config
 
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
