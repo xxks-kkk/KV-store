@@ -1,11 +1,13 @@
 from SimpleXMLRPCServer import SimpleXMLRPCServer
+import xmlrpclib
 import argparse
 import config
+import sys
 
 joinSeq = [False] * config.SERVER_COUNT
 
 def joinServer(dogs, clients, servers, arg):
-    dogs[int(arg[1])].joinServer()
+    dogs[int(arg[1])].joinServer(int(arg[1]))
     for i in range(config.SERVER_COUNT):
         if joinSeq[i]:
             createConnection(dogs, clients, servers, (0, arg[1], i))
@@ -55,9 +57,9 @@ if __name__ == "__main__":
     # 2. Wait for the Samantha's command
     dogs, clients, servers = [], [], []
     for i in range(config.SERVER_COUNT):
-        dogs.append( xmlrpclib.ServerProxy('http://' + config.WATCHDOG_IP_LIST[i] + ':' + config.WATCHDOG_PORT[i]))
-        clients.append(xmlrpclib.ServerProxy('http://' + config.CLIENT_IP_LIST[i]+ ':' + config.CLIENT_PORT[i]))
-        servers.append(xmlrpclib.ServerProxy('http://' + config.WATCHDOG_IP_LIST[i] + ':' + config.SERVER_PORT[i]))
+        dogs.append( xmlrpclib.ServerProxy('http://' + str(config.WATCHDOG_IP_LIST[i]) + ':' + str(config.WATCHDOG_PORT[i])))
+        clients.append(xmlrpclib.ServerProxy('http://' + str(config.CLIENT_IP_LIST[i])+ ':' + str(config.CLIENT_PORT[i])))
+        servers.append(xmlrpclib.ServerProxy('http://' + str(config.WATCHDOG_IP_LIST[i]) + ':' +str(config.SERVER_PORT[i])))
 
     command2func = {
                     'joinServer' : joinServer,
@@ -71,11 +73,8 @@ if __name__ == "__main__":
                     'get' : get
     }
 
-    try:
-        while True:
-            input = sys.stdin.readline().strip('\n')
-            arg = input.split(' ')
-            func = command2func.get(arg[0], 'nothing')
-            func(dogs, clients, servers, arg)
-    except:
-        pass
+    while True:
+        input = sys.stdin.readline().strip('\n')
+        arg = input.split(' ')
+        func = command2func.get(arg[0], 'nothing')
+        func(dogs, clients, servers, arg)
