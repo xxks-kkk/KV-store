@@ -15,6 +15,8 @@ class Router:
         payload: routeMat of the sender
         '''
         sendId = payload[0]
+        if sendId == self.id:
+            return False
         sendRouteMat = payload[1]
         isChange = False
         #Build new connection for forward

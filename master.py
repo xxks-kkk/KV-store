@@ -2,11 +2,18 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 import argparse
 import config
 
+joinSeq = [False] * config.SERVER_COUNT
+
 def joinServer(dogs, clients, servers, arg):
     dogs[int(arg[1])].joinServer()
+    for i in range(config.SERVER_COUNT):
+        if joinSeq[i]:
+            createConnection(dogs, clients, servers, (0, arg[1], i))
+    joinSeq[int(arg[1])] = True
 
 def killServer(dogs, clients, servers, arg):
     dogs[int(arg[1])].killServer()
+    joinSeq[int(arg[1])] = False
 
 def joinClient(dogs, clients, servers, arg):
     clients[int(arg[1]) % config.CLIENT_COUNT].joinServer(int(arg[2]))
