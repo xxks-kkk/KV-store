@@ -203,8 +203,8 @@ class ServerRPC(xmlrpc.XMLRPC):
         })
         return self.proxy.timeStamp.vector_clock
 
-    def xmlrpc_get(self, key):
-        return model.get(key)
+    def xmlrpc_get(self, key, cachedTimeStamp):
+        return model.get(key, cachedTimeStamp)
 
 
 if __name__ == '__main__':
@@ -221,7 +221,6 @@ if __name__ == '__main__':
         help="server id")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
-    print(config.ADDR_PORT[options.serverId])
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
     proxy = ServerProxy(options.serverId)
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
