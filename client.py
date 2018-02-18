@@ -3,6 +3,7 @@ from twisted.python import log
 import subprocess
 import config
 from optparse import OptionParser
+import xmlrpclib
 
 
 class ClientProxy:
@@ -11,22 +12,26 @@ class ClientProxy:
     """
 
     def __init__(self):
-        self.fakedict = {}
-        pass
+        # dict stores key-clock pair to handle the ERR_DEP
+        self.dict = {}
+        self.server = None
 
     def connect(self, serverId):
-        log.msg("[Fake Dict]Connnected to Server_{}.".format(serverId))
+        ip_port_pair = list(config.ADDR_PORT(serverId)[0:2])
+        server_url = 'http://' + ip_port_pair[0] + ':' + str(ip_port_pair[1])
+        self.server = xmlrpclib.ServerProxy(server_url)
 
     def disconnect(self):
-        log.msg("[Fake Dict]disconnect from Server_{}.".format(serverId))
+        self.server = None
 
     def put(self, key, value):
-        self.fakedict[key] = value
+        vectorClock = self.server.put(key, value)
+        self.dict[key] = vectorClock
         return 0
 
     def get(self, key):
-        return self.fakedict.get(key, None)
-
+        self.server.get(key, self.dict[key])
+        return 0
 
 class ClientServer(xmlrpc.XMLRPC):
     """

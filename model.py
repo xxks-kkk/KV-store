@@ -82,11 +82,17 @@ class Model:
                 self.serverProxy.sendMessage({"receiverId": i, "messageId": id, "Method": "Put", "Payload": item})
                 # "Payload" means the content send to the network
 
-    def get(self, key):
+    def get(self, key, timeStamp):
         """
         return according to API specification.
         """
-        return self.fileDict.data[key]['value']
+        if not clock.isHappenBefore(0, self.serverProxy.timeStamp, 0, timeStamp):
+            try:
+                return self.fileDict.data[key]['value'], self.fileDict.data[key]['timeStamp']
+            except KeyError:
+                return config.KEY_ERROR
+        else:
+            return config.ERR_DEP
 
 if __name__ == "__main__":
     pass

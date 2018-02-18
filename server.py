@@ -7,6 +7,7 @@ from twisted.python import log
 from model import Model
 from clock import Clock
 from router import Router
+import copy
 import config
 import json
 
@@ -49,7 +50,7 @@ class ServerProxy(object):
         self.timeStamp.onMessageReceived(self.serverId,
                                          Clock(message["TimeStamp"]))
         if not self.lc_call.running:
-            self.lc_call.start(0.5)
+            self.lc_call.start(config.GOSSIP_INTERVAL)
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
@@ -192,6 +193,19 @@ class ServerRPC(xmlrpc.XMLRPC):
         log.msg("Fake printStore...")
         return 0
 
+    def xmlrpc_put(self, key, value):
+        self.proxy.timeStamp.incrementClock(id)
+        model.put({
+            "key": key,
+            "value": value,
+            "serverId": self.proxy.serverId,
+            "timeStamp": copy.copy(self.proxy.timeStamp)
+        })
+        return self.proxy.timeStamp.vector_clock
+
+    def xmlrpc_get(self, key, cachedTimeStamp):
+        return model.get(key, cachedTimeStamp)
+
 
 if __name__ == '__main__':
     from twisted.internet import reactor
@@ -207,7 +221,6 @@ if __name__ == '__main__':
         help="server id")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
-    print(config.ADDR_PORT[options.serverId])
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
     proxy = ServerProxy(options.serverId)
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
