@@ -173,6 +173,8 @@ class ServerRPC(xmlrpc.XMLRPC):
             raise Exception("Try to start a server on client port")
 
     def xmlrpc_createConnection(self, cid):
+        host, port = config.ADDR_PORT[str(cid)]
+        if cid in self.proxy.factory.peers: return 0
         point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
         d = point.connect(self.proxy.factory)
         d.addCallback(self.proxy.greeting, cid)
