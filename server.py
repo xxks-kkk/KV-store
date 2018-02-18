@@ -50,7 +50,7 @@ class ServerProxy(object):
         self.timeStamp.onMessageReceived(self.serverId,
                                          Clock(message["TimeStamp"]))
         if not self.lc_call.running:
-            self.lc_call.start(0.5)
+            self.lc_call.start(config.GOSSIP_INTERVAL)
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
