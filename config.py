@@ -26,3 +26,8 @@ SERVER_COUNT = 5
 CLIENT_COUNT = 5
 WATCHDOG_IP_LIST = ["localhost"] * SERVER_COUNT
 CLIENR_IP_LIST = ["localhost"] * CLIENT_COUNT
+
+
+# Error message
+KEY_ERROR = -1
+ERR_DEP = -2
