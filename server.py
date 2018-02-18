@@ -2,6 +2,7 @@
 from twisted.web import xmlrpc, server
 from twisted.internet.protocol import Protocol, Factory
 from twisted.internet.task import LoopingCall
+from twisted.internet import endpoints
 from twisted.python import log
 from model import Model
 from clock import Clock
@@ -20,6 +21,7 @@ class ServerProxy(object):
 
     def greeting(self, protocol, id):
         # setup connection between factory and protocol
+        id = int(id)
         protocol.remote_id = id
         protocol.factory.peers[id] = protocol
         protocol.factory.proxy.router.neighbourChange(id, True)
@@ -169,6 +171,19 @@ class ServerRPC(xmlrpc.XMLRPC):
         if kind != "server":
             raise Exception("Try to start a server on client port")
 
+    def xmlrpc_createConnection(self, cid):
+        point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
+        d = point.connect(self.proxy.factory)
+        d.addCallback(self.proxy.greeting, cid)
+        return 0
+
+    def xmlrpc_breakConnection(self, cid):
+        cid = int(cid)
+        if cid in self.proxy.factory.peers:
+            peer = self.proxy.factory.peers[cid]
+            peer.transport.loseConnection()
+        return 0
+
     def xmlrpc_stabilize(self):
         log.msg("Fake Statbilizing...")
         return 0
@@ -179,7 +194,7 @@ class ServerRPC(xmlrpc.XMLRPC):
 
 
 if __name__ == '__main__':
-    from twisted.internet import reactor, endpoints
+    from twisted.internet import reactor
     from optparse import OptionParser
     parser = OptionParser(
         usage="The storage server instance, should be called by watchdog.")
@@ -198,11 +213,11 @@ if __name__ == '__main__':
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
     factory = ServerFactory(proxy)
     serverEndpoint.listen(factory)
-    for i, (IP, port, kind) in config.ADDR_PORT.items():
-        if kind != "server" or int(i) >= int(options.serverId): continue
-        point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
-        d = point.connect(factory)
-        d.addCallback(proxy.greeting, int(i))
+    # for i, (IP, port, kind) in config.ADDR_PORT.items():
+    #     if kind != "server" or int(i) >= int(options.serverId): continue
+    #     point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
+    #     d = point.connect(factory)
+    #     d.addCallback(proxy.greeting, int(i))
 
     s = ServerRPC(proxy)
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
