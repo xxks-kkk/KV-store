@@ -7,6 +7,7 @@ from twisted.python import log
 from model import Model
 from clock import Clock
 from router import Router
+import copy
 import config
 import json
 
@@ -191,6 +192,19 @@ class ServerRPC(xmlrpc.XMLRPC):
     def xmlrpc_printStore(self):
         log.msg("Fake printStore...")
         return 0
+
+    def xmlrpc_put(self, key, value):
+        self.proxy.timeStamp.incrementClock(id)
+        model.put({
+            "key": key,
+            "value": value,
+            "serverId": self.proxy.serverId,
+            "timeStamp": copy.copy(self.proxy.timeStamp)
+        })
+        return self.proxy.timeStamp.vector_clock
+
+    def xmlrpc_get(self, key):
+        return model.get(key)
 
 
 if __name__ == '__main__':
