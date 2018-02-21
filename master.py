@@ -3,13 +3,18 @@ import xmlrpclib
 import argparse
 import config
 import sys
+import time
 
 joinSeq = [False] * config.SERVER_COUNT
 
 def joinServer(dogs, clients, servers, arg):
     dogs[int(arg[1])].joinServer(int(arg[1]))
+    time.sleep(1)
     for i in range(config.SERVER_COUNT):
         if joinSeq[i]:
+            print arg[1]
+            print i
+
             createConnection(dogs, clients, servers, (0, arg[1], i))
     joinSeq[int(arg[1])] = True
 
@@ -75,6 +80,7 @@ if __name__ == "__main__":
 
     while True:
         input = sys.stdin.readline().strip('\n')
+        print input
         arg = input.split(' ')
         func = command2func.get(arg[0], 'nothing')
         func(dogs, clients, servers, arg)
