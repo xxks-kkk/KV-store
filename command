@@ -7,3 +7,4 @@ breakConnection 1 4
 breakConnection 2 3
 breakConnection 2 4
 breakConnection 0 1
+breakConnection 0 4
