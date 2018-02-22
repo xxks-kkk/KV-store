@@ -12,9 +12,6 @@ def joinServer(dogs, clients, servers, arg):
     time.sleep(1)
     for i in range(config.SERVER_COUNT):
         if joinSeq[i]:
-            print arg[1]
-            print i
-
             createConnection(dogs, clients, servers, (0, arg[1], i))
     joinSeq[int(arg[1])] = True
 
@@ -24,7 +21,6 @@ def killServer(dogs, clients, servers, arg):
 
 def joinClient(dogs, clients, servers, arg):
     clients[int(arg[1]) % config.CLIENT_COUNT].joinServer(int(arg[2]))
-    pass
 
 def breakConnection(dogs, clients, servers, arg):
     # if break between client and server, send to client, 
@@ -80,6 +76,8 @@ if __name__ == "__main__":
 
     while True:
         input = sys.stdin.readline().strip('\n')
+	if len(input) == 0:
+	    break
         print input
         arg = input.split(' ')
         func = command2func.get(arg[0], 'nothing')
