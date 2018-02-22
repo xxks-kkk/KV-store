@@ -145,8 +145,8 @@ class ServerProtocol(Protocol):
                 self.factory.proxy.router.neighbourChange(self.remote_id, True)
                 if self.remote_id not in self.factory.peers:
                     self.factory.peers[self.remote_id] = self
-            log.msg("Received {} from {}.".format(message, self.remote_id))
-            self.factory.proxy.messageReceived(message)
+          #  log.msg("Received {} from {}.".format(message, self.remote_id))
+          #  self.factory.proxy.messageReceived(message)
 
 
 class ServerFactory(Factory):
