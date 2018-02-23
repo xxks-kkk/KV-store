@@ -17,7 +17,7 @@ class ClientProxy:
         self.server = None
 
     def connect(self, serverId):
-        ip_port_pair = list(config.ADDR_PORT(serverId)[0:2])
+        ip_port_pair = list(config.ADDR_PORT[str(serverId)][0:2])
         server_url = 'http://' + ip_port_pair[0] + ':' + str(ip_port_pair[1])
         self.server = xmlrpclib.ServerProxy(server_url)
 
@@ -44,7 +44,6 @@ class ClientServer(xmlrpc.XMLRPC):
         self.proxy = ClientProxy()
 
     def xmlrpc_joinClient(self, serverId):
-        log.msg("joinClient Called!")
         # RPC server implementation
         # for master
         try:
