@@ -19,7 +19,7 @@ class ClientProxy:
     def connect(self, serverId):
         ip_port_pair = list(config.ADDR_PORT[str(serverId)][0:2])
         server_url = 'http://' + ip_port_pair[0] + ':' + str(ip_port_pair[1])
-        self.server = xmlrpclib.ServerProxy(server_url)
+        self.server = xmlrpclib.ServerProxy(server_url, allow_none=True)
 
     def disconnect(self):
         self.server = None
@@ -30,8 +30,10 @@ class ClientProxy:
         return 0
 
     def get(self, key):
-        self.server.get(key, self.dict[key])
-        return 0
+        if key in self.dict:
+            return self.server.get(key, self.dict[key])
+        else:
+            return self.server.get(key, None)
 
 class ClientServer(xmlrpc.XMLRPC):
     """

@@ -30,6 +30,6 @@ GOSSIP_INTERVAL = 1
 
 
 # Error message
-KEY_ERROR = -1
-ERR_DEP = -2
+KEY_ERROR = "ERR_KEY"
+ERR_DEP = "ERR_DEP"
 

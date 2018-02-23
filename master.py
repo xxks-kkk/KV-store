@@ -50,7 +50,8 @@ def put(dogs, clients, servers, arg):
     clients[int(arg[1]) % config.CLIENT_COUNT].put(arg[2], arg[3])
 
 def get(dogs, clients, servers, arg):
-    clients[int(arg[1]) % config.CLIENT_COUNT].get(arg[2]) 
+    res = clients[int(arg[1]) % config.CLIENT_COUNT].get(arg[2]) 
+    print "get {} = {}".format(arg[2], res)
 if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
     #    (NOTE: connect with watchdogs before servers)

@@ -17,7 +17,7 @@ class ServerProxy(object):
         self.serverId = int(serverId)
         self.model = Model(self)
         self.timeStamp = Clock()
-        self.router = Router(self.serverId)
+        self.router = Router(self.serverId) 
         self.lc_call = LoopingCall(self.gossip)
 
     def greeting(self, protocol, id):
@@ -196,17 +196,17 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_put(self, key, value):
-        self.proxy.timeStamp.incrementClock(id)
-        model.put({
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        self.proxy.model.put({
             "key": key,
             "value": value,
             "serverId": self.proxy.serverId,
-            "timeStamp": copy.copy(self.proxy.timeStamp)
+            "timeStamp": copy.copy(self.proxy.timeStamp).vector_clock
         })
         return self.proxy.timeStamp.vector_clock
 
     def xmlrpc_get(self, key, cachedTimeStamp):
-        return model.get(key, cachedTimeStamp)
+        return self.proxy.model.get(key, cachedTimeStamp)
 
 
 if __name__ == '__main__':

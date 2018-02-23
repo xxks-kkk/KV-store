@@ -41,28 +41,23 @@ class Model:
         timeStamp = item['timeStamp']
         serverId = item['serverId']
         messageId = item['messageId']
-        if serverId == self.serverProxy.serverId:
-            # our server is the destination of the incoming internal put request
-            if key in self.fileDict and clock.isHappenBefore(self.serverProxy.serverId,
-                                                             self.fileDict[key]['timeStamp'],
-                                                             serverId,
-                                                             timeStamp):
-                # Our server kV pair is the latest. We do nothing and immediately send back the ACK
-                self.serverProxy.sendMessage({"receiverId": self.serverProxy.serverId,
-                                              "messageId": messageId,
-                                              "Method": "Ack",
-                                              "Payload": messageId})
-            else:
-                # Our server doesn't have this KV pair or our KV pair is outdated
-                self.fileDict.put(item)
-                self.serverProxy.sendMessage({"receiverId": self.serverProxy.serverId,
-                                             "messageId": messageId,
-                                             "Method": "Ack",
-                                             "Payload": messageId})
+        print "put_internal", item
+        if key in self.fileDict and clock.isHappenBefore(self.serverProxy.serverId,
+                                                         self.fileDict[key]['timeStamp'],
+                                                         serverId,
+                                                         clock.Clock(timeStamp)):
+            # Our server kV pair is the latest. We do nothing and immediately send back the ACK
+            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
+                                          "MessageId": messageId,
+                                          "Method": "Ack",
+                                          "Payload": messageId})
         else:
-            # Our server is the not the target of the internal put request. We use underlying server module to redirect
-            # the message to the target server
-            self.serverProxy.sendMessage({"receiverId": serverId, "messageId": messageId, "Method": "Put", "Payload": item})
+            # Our server doesn't have this KV pair or our KV pair is outdated
+            self.fileDict.put(item)
+            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
+                                         "MessageId": messageId,
+                                         "Method": "Ack",
+                                         "Payload": messageId})
 
 
     def put(self, item):
@@ -71,7 +66,7 @@ class Model:
         :param item: a dictionary with "key", "value", "serverId", "timeStamp", "messageId"
         :return:
         """
-        id = uuid.uuid1()
+        id = str(uuid.uuid1())
         item['messageId'] = id
         self.fileDict.put(item)
         self.writeLog[id] = ["put", item, [0]*config.NUM_SERVER]
@@ -79,16 +74,18 @@ class Model:
             if i == self.serverProxy.serverId:
                 continue
             else:
-                self.serverProxy.sendMessage({"receiverId": i, "messageId": id, "Method": "Put", "Payload": item})
+                self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
                 # "Payload" means the content send to the network
 
     def get(self, key, timeStamp):
         """
         return according to API specification.
         """
-        if not clock.isHappenBefore(0, self.serverProxy.timeStamp, 0, timeStamp):
+        print "comparing self {} and client {}".format(self.serverProxy.timeStamp.vector_clock, timeStamp)
+        if timeStamp is None or not clock.isHappenBefore(0, self.serverProxy.timeStamp, 0, clock.Clock(timeStamp)) \
+            or self.serverProxy.timeStamp.vector_clock == timeStamp:
             try:
-                return self.fileDict.data[key]['value'], self.fileDict.data[key]['timeStamp']
+                return self.fileDict.data[key]['value']
             except KeyError:
                 return config.KEY_ERROR
         else:

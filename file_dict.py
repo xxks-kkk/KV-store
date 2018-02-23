@@ -30,7 +30,7 @@ class FileDictionary:
         :param item: a dictionary with "key", "val", "serverId", "time"
         :return: None
         """
-        self.data[key] = item
+        self.data[item["key"]] = item
 
     def get(self, key):
         """
