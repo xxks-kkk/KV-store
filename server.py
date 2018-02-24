@@ -10,7 +10,6 @@ from router import Router
 import copy
 import config
 import json
-import signal
 
 
 class ServerProxy(object):
@@ -20,6 +19,7 @@ class ServerProxy(object):
         self.timeStamp = Clock()
         self.router = Router(self.serverId) 
         self.lc_call = LoopingCall(self.gossip)
+        self.lc_resend = LoopingCall(self.model.resend)
 
     def greeting(self, protocol, id):
         # setup connection between factory and protocol
@@ -52,6 +52,8 @@ class ServerProxy(object):
                                          Clock(message["TimeStamp"]))
         if not self.lc_call.running:
             self.lc_call.start(config.GOSSIP_INTERVAL)
+        if not self.lc_resend.running:
+            self.lc_resend.start(config.RESEND_INTERVAL)
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
@@ -238,7 +240,5 @@ if __name__ == '__main__':
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
     log.msg("Server Running on {}.".format(s.port))
-
-    #signal.signal(signal.SIGTERM, proxy.onShutDown)
     reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()

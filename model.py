@@ -94,5 +94,16 @@ class Model:
     def dump(self):
         self.fileDict.dump()
 
+    def resend(self):
+        # We want to constant check our writeLog and resend the message
+        # to the server that hasn't ack our message
+        for messageId in self.writeLog:
+            for server_id in range(config.NUM_SERVER):
+                if self.writeLog[messageId][2][server_id] == 1:
+                    # our ACK status vector is at 2nd position (0-index) of the list
+                    pass
+                else:
+                    self.serverProxy.sendMessage({"ReceiverId": server_id, "MessageId": messageId, "Method": "Put", "Payload": self.writeLog[messageId][1]})
+
 if __name__ == "__main__":
     pass
