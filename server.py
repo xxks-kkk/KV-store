@@ -7,7 +7,6 @@ from twisted.python import log
 from model import Model
 from clock import Clock
 from router import Router
-import copy
 import config
 import json
 
@@ -45,11 +44,11 @@ class ServerProxy(object):
             })
 
     def messageReceived(self, message):
+        self.timeStamp.onMessageReceived(self.serverId,
+                                         Clock(message["TimeStamp"]))
         if message["ReceiverId"] != self.serverId:
             self.sendMessage(message)
         senderId = message["SenderId"]
-        self.timeStamp.onMessageReceived(self.serverId,
-                                         Clock(message["TimeStamp"]))
         if not self.lc_gossip.running:
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
@@ -90,7 +89,7 @@ class ServerProxy(object):
         """
         # test if message contains precondition
         self.timeStamp.incrementClock(self.serverId)
-        message["TimeStamp"] = self.timeStamp.vector_clock
+        message["TimeStamp"] = list(self.timeStamp.vector_clock)
         message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
@@ -99,6 +98,7 @@ class ServerProxy(object):
         if message["Method"] != "Gossip":
             log.msg("Sent Message: {}".format(message), system=self.tag)
         self.factory.peers[nextStop].sendData(message)
+
 
         # sendMessage
 
@@ -202,17 +202,17 @@ class ServerRPC(xmlrpc.XMLRPC):
 
     def xmlrpc_put(self, key, value):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        snapshot = list(self.proxy.timeStamp.vector_clock)
         self.proxy.model.put({
             "key": key,
             "value": value,
             "serverId": self.proxy.serverId,
-            "timeStamp": copy.copy(self.proxy.timeStamp.vector_clock)
+            "timeStamp": snapshot
         })
-        return self.proxy.timeStamp.vector_clock
+        return snapshot
 
     def xmlrpc_get(self, key, cachedTimeStamp):
-        return self.proxy.model.get(key, cachedTimeStamp)
-
+        return self.proxy.model.get(key, cachedTimeStamp) 
 
 if __name__ == '__main__':
     from twisted.internet import reactor

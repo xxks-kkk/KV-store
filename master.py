@@ -3,6 +3,7 @@ import xmlrpclib
 import argparse
 import config
 import sys
+import os
 import time
 
 joinSeq = [False] * config.SERVER_COUNT
@@ -52,10 +53,12 @@ def put(dogs, clients, servers, arg):
 def get(dogs, clients, servers, arg):
     res = clients[int(arg[1]) % config.CLIENT_COUNT].get(arg[2]) 
     print "get {} = {}".format(arg[2], res)
+
 if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
     #    (NOTE: connect with watchdogs before servers)
     # 2. Wait for the Samantha's command
+    os.system("rm -rf dict")
     dogs, clients, servers = [], [], []
     for i in range(config.SERVER_COUNT):
         dogs.append( xmlrpclib.ServerProxy('http://' + str(config.WATCHDOG_IP_LIST[i]) + ':' + str(config.WATCHDOG_PORT[i])))
@@ -82,4 +85,4 @@ if __name__ == "__main__":
         arg = input.split(' ')
         func = command2func.get(arg[0], 'nothing')
         func(dogs, clients, servers, arg)
-        time.sleep(1)
+        time.sleep(0)

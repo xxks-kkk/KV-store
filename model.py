@@ -19,6 +19,8 @@ class Model:
         self.serverProxy = serverProxy
         self.writeLog = {}
         self.successLog = {}
+        self.receiptVector = [0] * config.NUM_SERVER
+        self.receiptVector[self.serverProxy.serverId] = 1
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)
 
     def printStore(self): # return the dictionary content to a string
@@ -39,22 +41,16 @@ class Model:
         serverId = item['serverId']
         messageId = item['messageId']
         print "put_internal", item
-        if key in self.fileDict and clock.isHappenBefore(self.serverProxy.serverId,
+        if key not in self.fileDict or clock.isHappenBefore(self.serverProxy.serverId,
                                                          self.fileDict[key]['timeStamp'],
                                                          serverId,
                                                          clock.Clock(timeStamp)):
-            # Our server kV pair is the latest. We do nothing and immediately send back the ACK
-            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
-                                          "MessageId": messageId,
-                                          "Method": "Ack",
-                                          "Payload": messageId})
-        else:
             # Our server doesn't have this KV pair or our KV pair is outdated
             self.fileDict.put(item)
-            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
-                                         "MessageId": messageId,
-                                         "Method": "Ack",
-                                         "Payload": messageId})
+        self.serverProxy.sendMessage({"ReceiverId": serverId,
+                                     "MessageId": messageId,
+                                     "Method": "Ack",
+                                     "Payload": messageId})
 
     def ack(self, message):
         msgId = message.get("MessageId", None)
@@ -67,13 +63,13 @@ class Model:
             return
         if msgId in self.successLog:
             return
-        if msgId in self.model.writeLog:
+        if msgId in self.writeLog:
             log.err(
                 _stuff=message,
                 _why="MessageId not in writeLog",
                 system=self.serverProxy.tag)
             return
-        item = self.model.writeLog[msgId]
+        item = self.writeLog[msgId]
         item[self.RECEIPT_IDX][int(payload["serverId"])] = 1
         if sum(item[self.RECEIPT_IDX]) == 5:
             self.successLog[msgId] = item
@@ -88,11 +84,9 @@ class Model:
         id = str(uuid.uuid1())
         item['messageId'] = id
         self.fileDict.put(item)
-        self.writeLog[id] = ["put", item, [0]*config.NUM_SERVER]
+        self.writeLog[id] = ["put", item, list(self.receiptVector)]
         for i in range(config.NUM_SERVER):
-            if i == self.serverProxy.serverId:
-                continue
-            else:
+            if i != self.serverProxy.serverId:
                 self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
                 # "Payload" means the content send to the network
 
