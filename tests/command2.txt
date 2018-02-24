@@ -1,0 +1,10 @@
+joinServer 1
+joinServer 2
+joinServer 0
+joinServer 3 
+joinServer 4
+killServer 1
+killServer 2
+killServer 0
+killServer 3 
+killServer 4

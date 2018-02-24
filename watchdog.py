@@ -14,11 +14,9 @@ class WatchDogServer(xmlrpc.XMLRPC):
         self.port = port
 
     def xmlrpc_joinServer(self, id):
-        print "enter"
         if self.proc is not None:
             print "Fault"
             return xmlrpc.Fault(1, "Server already started.")
-        print "enter try"
         try:
             self.proc = subprocess.Popen(["python", "server.py", "-i", str(id)])
             return 0
