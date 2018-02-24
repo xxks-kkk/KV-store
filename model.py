@@ -40,9 +40,8 @@ class Model:
         timeStamp = item['timeStamp']
         serverId = item['serverId']
         messageId = item['messageId']
-        print "put_internal", item
         if key not in self.fileDict or clock.isHappenBefore(self.serverProxy.serverId,
-                                                         self.fileDict[key]['timeStamp'],
+                                                         clock.Clock(self.fileDict[key]['timeStamp']),
                                                          serverId,
                                                          clock.Clock(timeStamp)):
             # Our server doesn't have this KV pair or our KV pair is outdated
@@ -99,7 +98,7 @@ class Model:
             try:
                 return self.fileDict.data[key]['value']
             except KeyError:
-                return config.KEY_ERROR
+                return config.KEY_ERROR if timeStamp is None else config.ERR_DEP
         else:
             return config.ERR_DEP
 

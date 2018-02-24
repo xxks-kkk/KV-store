@@ -53,16 +53,14 @@ class ServerProxy(object):
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
             self.lc_resend.start(config.RESEND_INTERVAL)
-        log.msg("Message Received: {}".format(message))
         if message["Method"] != "Gossip":
-            log.msg("Sent Message: {}".format(message))
+            log.msg("Message Received: {}".format(message))
+
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
-            log.msg("Internal Put received: {}".format(message), system=self.tag)
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
-            log.msg("Ack received: {}".format(message))
             self.model.ack(message)
         elif message["Method"] == "Gossip":
             self.router.receivedPayload(message["Payload"])
@@ -95,8 +93,6 @@ class ServerProxy(object):
         if nextStop is None:
             # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
-        if message["Method"] != "Gossip":
-            log.msg("Sent Message: {}".format(message), system=self.tag)
         self.factory.peers[nextStop].sendData(message)
 
 
