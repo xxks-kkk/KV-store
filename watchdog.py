@@ -27,7 +27,9 @@ class WatchDogServer(xmlrpc.XMLRPC):
         if self.proc is None:
             return xmlrpc.Fault(1, "Server hasn't started.")
         try:
-            self.proc.kill()
+            # send a SIGTERM to self.proc and wait for it to terminate
+            self.proc.terminate()
+            self.proc.wait()
             self.proc = None
             return 0
         except Exception as e:

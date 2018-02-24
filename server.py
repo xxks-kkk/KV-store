@@ -10,6 +10,7 @@ from router import Router
 import copy
 import config
 import json
+import signal
 
 
 class ServerProxy(object):
@@ -105,6 +106,12 @@ class ServerProxy(object):
 
         # sendMessage
 
+    def onShutDown(self):
+        # When we receive SIGINT, we save the data from the memory to disk
+        log.msg("Recieved signal - SIGTERM")
+        log.msg("Dumping ...")
+        self.model.dump()
+        log.msg("Shutting down ...")
 
 class ServerProtocol(Protocol):
     def __init__(self, factory):
@@ -227,14 +234,11 @@ if __name__ == '__main__':
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
     factory = ServerFactory(proxy)
     serverEndpoint.listen(factory)
-    # for i, (IP, port, kind) in config.ADDR_PORT.items():
-    #     if kind != "server" or int(i) >= int(options.serverId): continue
-    #     point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
-    #     d = point.connect(factory)
-    #     d.addCallback(proxy.greeting, int(i))
-
     s = ServerRPC(proxy)
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
     log.msg("Server Running on {}.".format(s.port))
+
+    #signal.signal(signal.SIGTERM, proxy.onShutDown)
+    reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()
