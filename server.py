@@ -192,8 +192,7 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_printStore(self):
-        log.msg("Fake printStore...")
-        return 0
+        return self.proxy.model.printStore()
 
     def xmlrpc_put(self, key, value):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)

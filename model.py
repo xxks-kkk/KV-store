@@ -23,7 +23,7 @@ class Model:
     # def onStablize(self):
     #     pass
 
-    def onPrintStore(self):
+    def printStore(self):
         # return the dictionary content to a string
         content = ""
         for key in self.fileDict.data.keys():
