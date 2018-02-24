@@ -4,3 +4,4 @@ joinClient 5 0
 joinClient 6 1
 killServer 0
 killServer 1
+# test joinClient

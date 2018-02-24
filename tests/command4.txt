@@ -8,3 +8,4 @@ get 5 k1
 get 6 k2
 killServer 0
 killServer 1
+# test put and get on the same server

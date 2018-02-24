@@ -32,4 +32,4 @@ killServer 1
 killServer 2
 killServer 3
 killServer 4
-
+# test consistency (non-complete graph)
