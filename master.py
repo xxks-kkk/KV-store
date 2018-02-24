@@ -43,7 +43,7 @@ def stablize(dogs, clients, servers, arg):
         server.stablize()
 
 def printStore(dogs, clients, servers, arg):
-    servers[int(arg[1])].printStore()
+    print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
     # what happens if there are ' ' in key and value
