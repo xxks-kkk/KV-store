@@ -109,5 +109,8 @@ class Model:
         else:
             return config.ERR_DEP
 
+    def dump(self):
+        self.fileDict.dump()
+
 if __name__ == "__main__":
     pass
