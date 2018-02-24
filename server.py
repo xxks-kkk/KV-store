@@ -18,7 +18,8 @@ class ServerProxy(object):
         self.model = Model(self)
         self.timeStamp = Clock()
         self.router = Router(self.serverId) 
-        self.lc_call = LoopingCall(self.gossip)
+
+        self.lc_gossip = LoopingCall(self.gossip)
         self.lc_resend = LoopingCall(self.model.resend)
 
     def greeting(self, protocol, id):
@@ -29,8 +30,7 @@ class ServerProxy(object):
         protocol.factory.proxy.router.neighbourChange(id, True)
 
         self.timeStamp.incrementClock(self.serverId)
-        protocol.sendData({
-            "Method": "Hello",
+        protocol.sendData({ "Method": "Hello",
             "ReceiverId": id,
             "SenderId": self.serverId,
             "TimeStamp": self.timeStamp.vector_clock
@@ -50,29 +50,21 @@ class ServerProxy(object):
         senderId = message["SenderId"]
         self.timeStamp.onMessageReceived(self.serverId,
                                          Clock(message["TimeStamp"]))
-        if not self.lc_call.running:
-            self.lc_call.start(config.GOSSIP_INTERVAL)
+        if not self.lc_gossip.running:
+            self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
             self.lc_resend.start(config.RESEND_INTERVAL)
+        log.msg("Message Received: {}".format(message))
+        if message["Method"] != "Gossip":
+            log.msg("Sent Message: {}".format(message))
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
+            log.msg("Internal Put received: {}".format(message), system=self.tag)
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
-            msgId = message.get("MessageId", None)
-            if not msgId:
-                log.err(
-                    _stuff=message,
-                    _why="No MessageId passed",
-                    system=self.tag)
-                return
-            if msgId in self.model.writeLog:
-                log.err(
-                    _stuff=message,
-                    _why="MessageId not in writeLog",
-                    system=self.tag)
-                return
-            self.model.writeLog[msgId][receiptVector][senderId] = 1
+            log.msg("Ack received: {}".format(message))
+            self.model.ack(message)
         elif message["Method"] == "Gossip":
             self.router.receivedPayload(message["Payload"])
         else:
@@ -102,8 +94,10 @@ class ServerProxy(object):
         message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
-            log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
+            # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
+        if message["Method"] != "Gossip":
+            log.msg("Sent Message: {}".format(message), system=self.tag)
         self.factory.peers[nextStop].sendData(message)
 
         # sendMessage
@@ -154,8 +148,7 @@ class ServerProtocol(Protocol):
                 self.factory.proxy.router.neighbourChange(self.remote_id, True)
                 if self.remote_id not in self.factory.peers:
                     self.factory.peers[self.remote_id] = self
-          #  log.msg("Received {} from {}.".format(message, self.remote_id))
-          #  self.factory.proxy.messageReceived(message)
+            self.factory.proxy.messageReceived(message)
 
 
 class ServerFactory(Factory):
@@ -182,6 +175,7 @@ class ServerRPC(xmlrpc.XMLRPC):
             raise Exception("Try to start a server on client port")
 
     def xmlrpc_createConnection(self, cid):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         host, port, _ = config.ADDR_PORT[str(cid)]
         if cid in self.proxy.factory.peers: return 0
         point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
@@ -190,6 +184,7 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_breakConnection(self, cid):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
@@ -197,10 +192,12 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_stabilize(self):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         log.msg("Fake Statbilizing...")
         return 0
 
     def xmlrpc_printStore(self):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         return self.proxy.model.printStore()
 
     def xmlrpc_put(self, key, value):
@@ -209,7 +206,7 @@ class ServerRPC(xmlrpc.XMLRPC):
             "key": key,
             "value": value,
             "serverId": self.proxy.serverId,
-            "timeStamp": copy.copy(self.proxy.timeStamp).vector_clock
+            "timeStamp": copy.copy(self.proxy.timeStamp.vector_clock)
         })
         return self.proxy.timeStamp.vector_clock
 

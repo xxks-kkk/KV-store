@@ -82,3 +82,4 @@ if __name__ == "__main__":
         arg = input.split(' ')
         func = command2func.get(arg[0], 'nothing')
         func(dogs, clients, servers, arg)
+        time.sleep(1)

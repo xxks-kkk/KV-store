@@ -8,6 +8,7 @@ import config
 import clock
 
 class Model:
+    RECEIPT_IDX = 3
     """
     [
     "UUID": ["key", "value", "timeStamp", "serverId", "receiptVector"],
@@ -17,14 +18,10 @@ class Model:
     def __init__(self, serverProxy):
         self.serverProxy = serverProxy
         self.writeLog = {}
-        self.failLog = {}
+        self.successLog = {}
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)
 
-    # def onStablize(self):
-    #     pass
-
-    def printStore(self):
-        # return the dictionary content to a string
+    def printStore(self): # return the dictionary content to a string
         content = ""
         for key in self.fileDict.data.keys():
             content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
@@ -59,6 +56,28 @@ class Model:
                                          "Method": "Ack",
                                          "Payload": messageId})
 
+    def ack(self, message):
+        msgId = message.get("MessageId", None)
+        payload = message.get("Payload")
+        if not msgId:
+            log.err(
+                _stuff=message,
+                _why="No MessageId passed",
+                system=self.serverProxy.tag)
+            return
+        if msgId in self.successLog:
+            return
+        if msgId in self.model.writeLog:
+            log.err(
+                _stuff=message,
+                _why="MessageId not in writeLog",
+                system=self.serverProxy.tag)
+            return
+        item = self.model.writeLog[msgId]
+        item[self.RECEIPT_IDX][int(payload["serverId"])] = 1
+        if sum(item[self.RECEIPT_IDX]) == 5:
+            self.successLog[msgId] = item
+            del self.writeLog[msgId]
 
     def put(self, item):
         """
@@ -82,8 +101,7 @@ class Model:
         return according to API specification.
         """
         print "comparing self {} and client {}".format(self.serverProxy.timeStamp.vector_clock, timeStamp)
-        if timeStamp is None or not clock.isHappenBefore(0, self.serverProxy.timeStamp, 0, clock.Clock(timeStamp)) \
-            or self.serverProxy.timeStamp.vector_clock == timeStamp:
+        if timeStamp is None or clock.isHappenBefore(0, clock.Clock(timeStamp), 0, self.serverProxy.timeStamp):
             try:
                 return self.fileDict.data[key]['value']
             except KeyError:
