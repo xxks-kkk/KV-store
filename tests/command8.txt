@@ -12,6 +12,7 @@ joinClient 6 1
 joinClient 7 2
 joinClient 8 3
 joinClient 9 4
+stabilize
 put 5 k5 v5
 put 6 k6 v6
 put 7 k7 v7
