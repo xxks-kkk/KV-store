@@ -9,11 +9,8 @@ import time
 joinSeq = [False] * config.SERVER_COUNT
 
 def joinServer(dogs, clients, servers, arg):
-    dogs[int(arg[1])].joinServer(int(arg[1]))
-    time.sleep(1)
-    for i in range(config.SERVER_COUNT):
-        if joinSeq[i]:
-            createConnection(dogs, clients, servers, (0, arg[1], i))
+    toConnect = [i for i, v in enumerate(joinSeq) if v == True]
+    dogs[int(arg[1])].joinServer(int(arg[1]), toConnect)
     joinSeq[int(arg[1])] = True
 
 def killServer(dogs, clients, servers, arg):

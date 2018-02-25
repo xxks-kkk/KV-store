@@ -218,10 +218,17 @@ if __name__ == '__main__':
     parser.add_option(
         "-i",
         "--serverId",
-        metavar="PORT_NUM",
+        metavar="SERVERID",
         type="string",
         dest="serverId",
         help="server id")
+    parser.add_option(
+        "-c",
+        "--connection",
+        metavar="CONNECT_SERVER_ID",
+        type="string",
+        dest="toConnect",
+        help="server ids this server to connect to")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
@@ -232,6 +239,13 @@ if __name__ == '__main__':
     s = ServerRPC(proxy)
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
+    if options.toConnect:
+        for cid in options.toConnect:
+            host, port, _ = config.ADDR_PORT[cid]
+            point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
+            d = point.connect(proxy.factory)
+            d.addCallback(proxy.greeting, cid)
+    
     log.msg("Server Running on {}.".format(s.port))
     reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()
