@@ -9,8 +9,7 @@ import time
 joinSeq = [False] * config.SERVER_COUNT
 
 def joinServer(dogs, clients, servers, arg):
-    toConnect = [i for i, v in enumerate(joinSeq) if v == True]
-    dogs[int(arg[1])].joinServer(int(arg[1]), toConnect)
+    dogs[int(arg[1])].joinServer(int(arg[1]), joinSeq)
     joinSeq[int(arg[1])] = True
 
 def killServer(dogs, clients, servers, arg):
@@ -37,8 +36,9 @@ def createConnection(dogs, clients, servers, arg):
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
 def stabilize(dogs, clients, servers, arg):
-    for server in servers:
-        server.stabilize()
+    time.sleep(5)
+    # for server in servers:
+    #     server.stabilize()
 
 def printStore(dogs, clients, servers, arg):
     print servers[int(arg[1])].printStore()

@@ -20,7 +20,7 @@ class WatchDogServer(xmlrpc.XMLRPC):
         try:
             command = ["python", "server.py", "-i", str(id)]
             if toConnect:
-                command += list(map(str, toConnect))
+                command += ["-c"] + list(map(str, toConnect))
             self.proc = subprocess.Popen(command)
             d = defer.Deferred()
             from twisted.internet import reactor

@@ -88,12 +88,16 @@ class ServerProxy(object):
         # test if message contains precondition
         self.timeStamp.incrementClock(self.serverId)
         message["TimeStamp"] = list(self.timeStamp.vector_clock)
-        message["SenderId"] = self.serverId
+        if "SenderId" not in message:
+            message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
             # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
-        self.factory.peers[nextStop].sendData(message)
+        try:
+            self.factory.peers[nextStop].sendData(message)
+        except KeyError:
+            print "KeyError: ", message
 
 
         # sendMessage
@@ -228,6 +232,7 @@ if __name__ == '__main__':
         metavar="CONNECT_SERVER_ID",
         type="string",
         dest="toConnect",
+        nargs=5,
         help="server ids this server to connect to")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
@@ -240,8 +245,9 @@ if __name__ == '__main__':
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
     if options.toConnect:
-        for cid in options.toConnect:
-            host, port, _ = config.ADDR_PORT[cid]
+        for cid, v in enumerate(options.toConnect):
+            if v == "False": continue
+            host, port, _ = config.ADDR_PORT[str(cid)]
             point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
             d = point.connect(proxy.factory)
             d.addCallback(proxy.greeting, cid)
