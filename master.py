@@ -36,9 +36,9 @@ def createConnection(dogs, clients, servers, arg):
     else:
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
-def stablize(dogs, clients, servers, arg):
+def stabilize(dogs, clients, servers, arg):
     for server in servers:
-        server.stablize()
+        server.stabilize()
 
 def printStore(dogs, clients, servers, arg):
     print servers[int(arg[1])].printStore()
@@ -68,7 +68,7 @@ if __name__ == "__main__":
                     'joinClient' : joinClient,
                     'breakConnection' : breakConnection,
                     'createConnection' : createConnection,
-                    'stablize' : stablize,
+                    'stabilize' : stabilize,
                     'printStore' : printStore,
                     'put' : put,
                     'get' : get
