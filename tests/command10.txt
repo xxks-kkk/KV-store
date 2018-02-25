@@ -1,0 +1,17 @@
+joinServer 0
+joinServer 1
+joinClient 5 0
+joinClient 6 1
+put 5 k1 v1
+breakConnection 0 1
+put 5 k2 v2
+put 5 k3 v3
+createConnection 0 1
+stabilize
+get 6 k1
+get 6 k2
+get 6 k3
+killServer 0
+killServer 1
+
+# test connection failure
