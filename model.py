@@ -8,7 +8,7 @@ import config
 import clock
 
 class Model:
-    RECEIPT_IDX = 3
+    RECEIPT_IDX = 2
     """
     [
     "UUID": ["key", "value", "timeStamp", "serverId", "receiptVector"],
@@ -40,9 +40,8 @@ class Model:
         timeStamp = item['timeStamp']
         serverId = item['serverId']
         messageId = item['messageId']
-        print "put_internal", item
         if key not in self.fileDict or clock.isHappenBefore(self.serverProxy.serverId,
-                                                         self.fileDict[key]['timeStamp'],
+                                                         clock.Clock(self.fileDict[key]['timeStamp']),
                                                          serverId,
                                                          clock.Clock(timeStamp)):
             # Our server doesn't have this KV pair or our KV pair is outdated
@@ -50,11 +49,10 @@ class Model:
         self.serverProxy.sendMessage({"ReceiverId": serverId,
                                      "MessageId": messageId,
                                      "Method": "Ack",
-                                     "Payload": messageId})
+                                     "Payload": self.serverProxy.serverId})
 
     def ack(self, message):
         msgId = message.get("MessageId", None)
-        payload = message.get("Payload")
         if not msgId:
             log.err(
                 _stuff=message,
@@ -63,14 +61,15 @@ class Model:
             return
         if msgId in self.successLog:
             return
-        if msgId in self.writeLog:
+        if msgId not in self.writeLog:
             log.err(
                 _stuff=message,
                 _why="MessageId not in writeLog",
                 system=self.serverProxy.tag)
             return
         item = self.writeLog[msgId]
-        item[self.RECEIPT_IDX][int(payload["serverId"])] = 1
+        senderId = int(message["Payload"])
+        item[self.RECEIPT_IDX][senderId] = 1
         if sum(item[self.RECEIPT_IDX]) == 5:
             self.successLog[msgId] = item
             del self.writeLog[msgId]
@@ -94,12 +93,11 @@ class Model:
         """
         return according to API specification.
         """
-        print "comparing self {} and client {}".format(self.serverProxy.timeStamp.vector_clock, timeStamp)
         if timeStamp is None or clock.isHappenBefore(0, clock.Clock(timeStamp), 0, self.serverProxy.timeStamp):
             try:
                 return self.fileDict.data[key]['value']
             except KeyError:
-                return config.KEY_ERROR
+                return config.KEY_ERROR if timeStamp is None else config.ERR_DEP
         else:
             return config.ERR_DEP
 

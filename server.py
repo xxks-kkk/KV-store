@@ -53,16 +53,14 @@ class ServerProxy(object):
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
             self.lc_resend.start(config.RESEND_INTERVAL)
-        log.msg("Message Received: {}".format(message))
         if message["Method"] != "Gossip":
-            log.msg("Sent Message: {}".format(message))
+            log.msg("Message Received: {}".format(message))
+
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
-            log.msg("Internal Put received: {}".format(message), system=self.tag)
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
-            log.msg("Ack received: {}".format(message))
             self.model.ack(message)
         elif message["Method"] == "Gossip":
             self.router.receivedPayload(message["Payload"])
@@ -90,14 +88,16 @@ class ServerProxy(object):
         # test if message contains precondition
         self.timeStamp.incrementClock(self.serverId)
         message["TimeStamp"] = list(self.timeStamp.vector_clock)
-        message["SenderId"] = self.serverId
+        if "SenderId" not in message:
+            message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
             # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
-        if message["Method"] != "Gossip":
-            log.msg("Sent Message: {}".format(message), system=self.tag)
-        self.factory.peers[nextStop].sendData(message)
+        try:
+            self.factory.peers[nextStop].sendData(message)
+        except KeyError:
+            print "KeyError: ", message
 
 
         # sendMessage
@@ -225,10 +225,18 @@ if __name__ == '__main__':
     parser.add_option(
         "-i",
         "--serverId",
-        metavar="PORT_NUM",
+        metavar="SERVERID",
         type="string",
         dest="serverId",
         help="server id")
+    parser.add_option(
+        "-c",
+        "--connection",
+        metavar="CONNECT_SERVER_ID",
+        type="string",
+        dest="toConnect",
+        nargs=5,
+        help="server ids this server to connect to")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
@@ -239,6 +247,14 @@ if __name__ == '__main__':
     s = ServerRPC(proxy)
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
+    if options.toConnect:
+        for cid, v in enumerate(options.toConnect):
+            if v == "False": continue
+            host, port, _ = config.ADDR_PORT[str(cid)]
+            point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
+            d = point.connect(proxy.factory)
+            d.addCallback(proxy.greeting, cid)
+    
     log.msg("Server Running on {}.".format(s.port))
     reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()

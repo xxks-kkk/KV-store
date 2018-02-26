@@ -45,7 +45,6 @@ class Router:
         assume if it is neighbour, the val is used for discoonected
         if it is not connected, it is used for connect as neighbour
         '''
-        # neighbours[serverId] = val
         serverId = int(serverId)
         if val:
             self.routeMat[serverId] = [serverId]

@@ -9,4 +9,4 @@ joinClient 5 1
 get 5 kk
 killServer 0
 killServer 1
-
+# test printStore
