@@ -9,6 +9,7 @@ LOG_FILE = sys.stdout
 file_dict_dir = "dict/"
 LOG_DIR = "log/"
 WRITE_LOG = "W" # Write log
+SUCCESS_LOG = "S" # Success log
 NUM_SERVER = 5
 
 ADDR_PORT = {
