@@ -6,6 +6,10 @@ import uuid
 import file_dict
 import config
 import clock
+import log
+
+from signal import SIGINT, SIGTERM, SIGKILL
+from pysigset import suspended_signals
 
 class Model:
     RECEIPT_IDX = 2
@@ -17,7 +21,7 @@ class Model:
     """
     def __init__(self, serverProxy):
         self.serverProxy = serverProxy
-        self.writeLog = {}
+        self.writeLog = log.Log(serverProxy.serverId)
         self.successLog = {}
         self.receiptVector = [0] * config.NUM_SERVER
         self.receiptVector[self.serverProxy.serverId] = 1
@@ -82,8 +86,11 @@ class Model:
         """
         id = str(uuid.uuid1())
         item['messageId'] = id
-        self.fileDict.put(item)
-        self.writeLog[id] = ["put", item, list(self.receiptVector)]
+        with suspended_signals(SIGKILL, SIGINT, SIGTERM):
+            # Signals (SIGKILL, SIGINT, SIGTERM) are blocked here
+            self.fileDict.put(item)
+            self.writeLog[id] = ["put", item, list(self.receiptVector)]
+        # Any pending signal is fired now ...
         for i in range(config.NUM_SERVER):
             if i != self.serverProxy.serverId:
                 self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
@@ -102,7 +109,9 @@ class Model:
             return config.ERR_DEP
 
     def dump(self):
+        # We save the fildDict and writeLog to the disk
         self.fileDict.dump()
+        self.writeLog.dump()
 
     def resend(self):
         # We want to constant check our writeLog and resend the message
