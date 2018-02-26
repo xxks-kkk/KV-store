@@ -76,9 +76,12 @@ if __name__ == "__main__":
 
     while True:
         input = sys.stdin.readline().strip('\n')
-	if len(input) == 0 or input.startswith("#"):
-	    break
+        if len(input) == 0 or input.startswith("#"):
+            break
         print input
         arg = input.split(' ')
-        func = command2func.get(arg[0], 'nothing')
-        func(dogs, clients, servers, arg)
+        func = command2func.get(arg[0], None)
+        if func:
+            func(dogs, clients, servers, arg)
+        else:
+            continue
