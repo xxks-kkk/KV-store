@@ -16,7 +16,7 @@ commands = ['joinServer' ,
             'get' ]
 
 command_Nums = 40
-key = list('abcdefghijk')
+key = list('abcdefg')
 clientid = list('56789')
 chars = '1234567890-=qwertyuiopasdfghjklzxcvbnm,.//]!@#$%^&*())'
 lenchars = len(chars)
@@ -24,8 +24,9 @@ lenchars = len(chars)
 with open('commandList', 'w') as f:
     for _ in range(command_Nums):
         length = random.randint(600,1000)
+        k = key[random.randint(0, 6)]
         c = ''
         for i in range(length):
             c += chars[random.randint(0, lenchars - 1)]
 
-        f.write('put ' + clientid[random.randint(0,4)] + ' ' + c + '\n')
+        f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
