@@ -1,7 +1,6 @@
 # Purpose: vector clock
 
 import config
-import copy
 
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
@@ -22,7 +21,7 @@ class Clock:
 
     def __init__(self, vc = None):
         if vc:
-            self.vector_clock = copy.copy(vc)
+            self.vector_clock = list(vc)
         else:
             self.vector_clock = [0] * config.NUM_SERVER
 

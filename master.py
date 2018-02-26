@@ -3,16 +3,13 @@ import xmlrpclib
 import argparse
 import config
 import sys
+import os
 import time
 
 joinSeq = [False] * config.SERVER_COUNT
 
 def joinServer(dogs, clients, servers, arg):
-    dogs[int(arg[1])].joinServer(int(arg[1]))
-    time.sleep(1)
-    for i in range(config.SERVER_COUNT):
-        if joinSeq[i]:
-            createConnection(dogs, clients, servers, (0, arg[1], i))
+    dogs[int(arg[1])].joinServer(int(arg[1]), joinSeq)
     joinSeq[int(arg[1])] = True
 
 def killServer(dogs, clients, servers, arg):
@@ -38,9 +35,10 @@ def createConnection(dogs, clients, servers, arg):
     else:
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
-def stablize(dogs, clients, servers, arg):
-    for server in servers:
-        server.stablize()
+def stabilize(dogs, clients, servers, arg):
+    time.sleep(5)
+    # for server in servers:
+    #     server.stabilize()
 
 def printStore(dogs, clients, servers, arg):
     print servers[int(arg[1])].printStore()
@@ -52,10 +50,12 @@ def put(dogs, clients, servers, arg):
 def get(dogs, clients, servers, arg):
     res = clients[int(arg[1]) % config.CLIENT_COUNT].get(arg[2]) 
     print "get {} = {}".format(arg[2], res)
+
 if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
     #    (NOTE: connect with watchdogs before servers)
     # 2. Wait for the Samantha's command
+    os.system("rm -rf dict")
     dogs, clients, servers = [], [], []
     for i in range(config.SERVER_COUNT):
         dogs.append( xmlrpclib.ServerProxy('http://' + str(config.WATCHDOG_IP_LIST[i]) + ':' + str(config.WATCHDOG_PORT[i])))
@@ -68,7 +68,7 @@ if __name__ == "__main__":
                     'joinClient' : joinClient,
                     'breakConnection' : breakConnection,
                     'createConnection' : createConnection,
-                    'stablize' : stablize,
+                    'stabilize' : stabilize,
                     'printStore' : printStore,
                     'put' : put,
                     'get' : get
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     while True:
         input = sys.stdin.readline().strip('\n')
-	if len(input) == 0:
+	if len(input) == 0 or input.startswith("#"):
 	    break
         print input
         arg = input.split(' ')

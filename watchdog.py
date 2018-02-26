@@ -1,6 +1,7 @@
 # Purpose: fire up server, talk with master
 # implemented as RPC server
 from twisted.web import xmlrpc
+from twisted.internet import defer
 from twisted.python import log
 import subprocess
 import config
@@ -13,13 +14,19 @@ class WatchDogServer(xmlrpc.XMLRPC):
         xmlrpc.XMLRPC.__init__(self, **kwargs)
         self.port = port
 
-    def xmlrpc_joinServer(self, id):
+    def xmlrpc_joinServer(self, id, toConnect=None):
         if self.proc is not None:
-            print "Fault"
             return xmlrpc.Fault(1, "Server already started.")
         try:
-            self.proc = subprocess.Popen(["python", "server.py", "-i", str(id)])
-            return 0
+            command = ["python", "server.py", "-i", str(id)]
+            if toConnect:
+                command += ["-c"] + list(map(str, toConnect))
+            self.proc = subprocess.Popen(command)
+            d = defer.Deferred()
+            from twisted.internet import reactor
+            reactor.callLater(0.5, d.callback, None)
+            d.addCallback(lambda _: 0)
+            return d
         except Exception as e:
             return xmlrpc.Fault(2, str(e))
 
@@ -27,7 +34,9 @@ class WatchDogServer(xmlrpc.XMLRPC):
         if self.proc is None:
             return xmlrpc.Fault(1, "Server hasn't started.")
         try:
-            self.proc.kill()
+            # send a SIGTERM to self.proc and wait for it to terminate
+            self.proc.terminate()
+            self.proc.wait()
             self.proc = None
             return 0
         except Exception as e:

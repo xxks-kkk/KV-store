@@ -7,7 +7,6 @@ from twisted.python import log
 from model import Model
 from clock import Clock
 from router import Router
-import copy
 import config
 import json
 
@@ -18,7 +17,9 @@ class ServerProxy(object):
         self.model = Model(self)
         self.timeStamp = Clock()
         self.router = Router(self.serverId) 
-        self.lc_call = LoopingCall(self.gossip)
+
+        self.lc_gossip = LoopingCall(self.gossip)
+        self.lc_resend = LoopingCall(self.model.resend)
 
     def greeting(self, protocol, id):
         # setup connection between factory and protocol
@@ -28,8 +29,7 @@ class ServerProxy(object):
         protocol.factory.proxy.router.neighbourChange(id, True)
 
         self.timeStamp.incrementClock(self.serverId)
-        protocol.sendData({
-            "Method": "Hello",
+        protocol.sendData({ "Method": "Hello",
             "ReceiverId": id,
             "SenderId": self.serverId,
             "TimeStamp": self.timeStamp.vector_clock
@@ -44,32 +44,24 @@ class ServerProxy(object):
             })
 
     def messageReceived(self, message):
+        self.timeStamp.onMessageReceived(self.serverId,
+                                         Clock(message["TimeStamp"]))
         if message["ReceiverId"] != self.serverId:
             self.sendMessage(message)
         senderId = message["SenderId"]
-        self.timeStamp.onMessageReceived(self.serverId,
-                                         Clock(message["TimeStamp"]))
-        if not self.lc_call.running:
-            self.lc_call.start(config.GOSSIP_INTERVAL)
+        if not self.lc_gossip.running:
+            self.lc_gossip.start(config.GOSSIP_INTERVAL)
+        if not self.lc_resend.running:
+            self.lc_resend.start(config.RESEND_INTERVAL)
+        if message["Method"] != "Gossip":
+            log.msg("Message Received: {}".format(message))
+
         if message["Method"] == "Hello":
             pass
         elif message["Method"] == "Put":
             self.model.put_internal(message["Payload"])
         elif message["Method"] == "Ack":
-            msgId = message.get("MessageId", None)
-            if not msgId:
-                log.err(
-                    _stuff=message,
-                    _why="No MessageId passed",
-                    system=self.tag)
-                return
-            if msgId in self.model.writeLog:
-                log.err(
-                    _stuff=message,
-                    _why="MessageId not in writeLog",
-                    system=self.tag)
-                return
-            self.model.writeLog[msgId][receiptVector][senderId] = 1
+            self.model.ack(message)
         elif message["Method"] == "Gossip":
             self.router.receivedPayload(message["Payload"])
         else:
@@ -95,16 +87,27 @@ class ServerProxy(object):
         """
         # test if message contains precondition
         self.timeStamp.incrementClock(self.serverId)
-        message["TimeStamp"] = self.timeStamp.vector_clock
-        message["SenderId"] = self.serverId
+        message["TimeStamp"] = list(self.timeStamp.vector_clock)
+        if "SenderId" not in message:
+            message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
-            log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
+            # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
-        self.factory.peers[nextStop].sendData(message)
+        try:
+            self.factory.peers[nextStop].sendData(message)
+        except KeyError:
+            print "KeyError: ", message
+
 
         # sendMessage
 
+    def onShutDown(self):
+        # When we receive SIGINT, we save the data from the memory to disk
+        log.msg("Recieved signal - SIGTERM")
+        log.msg("Dumping ...")
+        self.model.dump()
+        log.msg("Shutting down ...")
 
 class ServerProtocol(Protocol):
     def __init__(self, factory):
@@ -145,8 +148,7 @@ class ServerProtocol(Protocol):
                 self.factory.proxy.router.neighbourChange(self.remote_id, True)
                 if self.remote_id not in self.factory.peers:
                     self.factory.peers[self.remote_id] = self
-          #  log.msg("Received {} from {}.".format(message, self.remote_id))
-          #  self.factory.proxy.messageReceived(message)
+            self.factory.proxy.messageReceived(message)
 
 
 class ServerFactory(Factory):
@@ -173,6 +175,7 @@ class ServerRPC(xmlrpc.XMLRPC):
             raise Exception("Try to start a server on client port")
 
     def xmlrpc_createConnection(self, cid):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         host, port, _ = config.ADDR_PORT[str(cid)]
         if cid in self.proxy.factory.peers: return 0
         point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
@@ -181,6 +184,7 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_breakConnection(self, cid):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
@@ -188,25 +192,27 @@ class ServerRPC(xmlrpc.XMLRPC):
         return 0
 
     def xmlrpc_stabilize(self):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         log.msg("Fake Statbilizing...")
         return 0
 
     def xmlrpc_printStore(self):
+        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
         return self.proxy.model.printStore()
 
     def xmlrpc_put(self, key, value):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        snapshot = list(self.proxy.timeStamp.vector_clock)
         self.proxy.model.put({
             "key": key,
             "value": value,
             "serverId": self.proxy.serverId,
-            "timeStamp": copy.copy(self.proxy.timeStamp).vector_clock
+            "timeStamp": snapshot
         })
-        return self.proxy.timeStamp.vector_clock
+        return snapshot
 
     def xmlrpc_get(self, key, cachedTimeStamp):
-        return self.proxy.model.get(key, cachedTimeStamp)
-
+        return self.proxy.model.get(key, cachedTimeStamp) 
 
 if __name__ == '__main__':
     from twisted.internet import reactor
@@ -216,10 +222,18 @@ if __name__ == '__main__':
     parser.add_option(
         "-i",
         "--serverId",
-        metavar="PORT_NUM",
+        metavar="SERVERID",
         type="string",
         dest="serverId",
         help="server id")
+    parser.add_option(
+        "-c",
+        "--connection",
+        metavar="CONNECT_SERVER_ID",
+        type="string",
+        dest="toConnect",
+        nargs=5,
+        help="server ids this server to connect to")
     (options, args) = parser.parse_args()
     log.startLogging(config.LOG_FILE)
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
@@ -227,14 +241,17 @@ if __name__ == '__main__':
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
     factory = ServerFactory(proxy)
     serverEndpoint.listen(factory)
-    # for i, (IP, port, kind) in config.ADDR_PORT.items():
-    #     if kind != "server" or int(i) >= int(options.serverId): continue
-    #     point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
-    #     d = point.connect(factory)
-    #     d.addCallback(proxy.greeting, int(i))
-
     s = ServerRPC(proxy)
     rpcEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort)
     rpcEndpoint.listen(server.Site(s))
+    if options.toConnect:
+        for cid, v in enumerate(options.toConnect):
+            if v == "False": continue
+            host, port, _ = config.ADDR_PORT[str(cid)]
+            point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
+            d = point.connect(proxy.factory)
+            d.addCallback(proxy.greeting, cid)
+    
     log.msg("Server Running on {}.".format(s.port))
+    reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()

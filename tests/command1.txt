@@ -8,3 +8,9 @@ breakConnection 2 3
 breakConnection 2 4
 breakConnection 0 1
 breakConnection 0 4
+killServer 1
+killServer 2
+killServer 0
+killServer 3 
+killServer 4
+# test API joinServer breakConnection killServer

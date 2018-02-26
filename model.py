@@ -8,6 +8,7 @@ import config
 import clock
 
 class Model:
+    RECEIPT_IDX = 2
     """
     [
     "UUID": ["key", "value", "timeStamp", "serverId", "receiptVector"],
@@ -17,14 +18,12 @@ class Model:
     def __init__(self, serverProxy):
         self.serverProxy = serverProxy
         self.writeLog = {}
-        self.failLog = {}
+        self.successLog = {}
+        self.receiptVector = [0] * config.NUM_SERVER
+        self.receiptVector[self.serverProxy.serverId] = 1
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)
 
-    # def onStablize(self):
-    #     pass
-
-    def printStore(self):
-        # return the dictionary content to a string
+    def printStore(self): # return the dictionary content to a string
         content = ""
         for key in self.fileDict.data.keys():
             content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
@@ -41,24 +40,39 @@ class Model:
         timeStamp = item['timeStamp']
         serverId = item['serverId']
         messageId = item['messageId']
-        print "put_internal", item
-        if key in self.fileDict and clock.isHappenBefore(self.serverProxy.serverId,
-                                                         self.fileDict[key]['timeStamp'],
+        if key not in self.fileDict or clock.isHappenBefore(self.serverProxy.serverId,
+                                                         clock.Clock(self.fileDict[key]['timeStamp']),
                                                          serverId,
                                                          clock.Clock(timeStamp)):
-            # Our server kV pair is the latest. We do nothing and immediately send back the ACK
-            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
-                                          "MessageId": messageId,
-                                          "Method": "Ack",
-                                          "Payload": messageId})
-        else:
             # Our server doesn't have this KV pair or our KV pair is outdated
             self.fileDict.put(item)
-            self.serverProxy.sendMessage({"ReceiverId": self.serverProxy.serverId,
-                                         "MessageId": messageId,
-                                         "Method": "Ack",
-                                         "Payload": messageId})
+        self.serverProxy.sendMessage({"ReceiverId": serverId,
+                                     "MessageId": messageId,
+                                     "Method": "Ack",
+                                     "Payload": self.serverProxy.serverId})
 
+    def ack(self, message):
+        msgId = message.get("MessageId", None)
+        if not msgId:
+            log.err(
+                _stuff=message,
+                _why="No MessageId passed",
+                system=self.serverProxy.tag)
+            return
+        if msgId in self.successLog:
+            return
+        if msgId not in self.writeLog:
+            log.err(
+                _stuff=message,
+                _why="MessageId not in writeLog",
+                system=self.serverProxy.tag)
+            return
+        item = self.writeLog[msgId]
+        senderId = int(message["Payload"])
+        item[self.RECEIPT_IDX][senderId] = 1
+        if sum(item[self.RECEIPT_IDX]) == 5:
+            self.successLog[msgId] = item
+            del self.writeLog[msgId]
 
     def put(self, item):
         """
@@ -69,11 +83,9 @@ class Model:
         id = str(uuid.uuid1())
         item['messageId'] = id
         self.fileDict.put(item)
-        self.writeLog[id] = ["put", item, [0]*config.NUM_SERVER]
+        self.writeLog[id] = ["put", item, list(self.receiptVector)]
         for i in range(config.NUM_SERVER):
-            if i == self.serverProxy.serverId:
-                continue
-            else:
+            if i != self.serverProxy.serverId:
                 self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
                 # "Payload" means the content send to the network
 
@@ -81,15 +93,27 @@ class Model:
         """
         return according to API specification.
         """
-        print "comparing self {} and client {}".format(self.serverProxy.timeStamp.vector_clock, timeStamp)
-        if timeStamp is None or not clock.isHappenBefore(0, self.serverProxy.timeStamp, 0, clock.Clock(timeStamp)) \
-            or self.serverProxy.timeStamp.vector_clock == timeStamp:
+        if timeStamp is None or clock.isHappenBefore(0, clock.Clock(timeStamp), 0, self.serverProxy.timeStamp):
             try:
                 return self.fileDict.data[key]['value']
             except KeyError:
-                return config.KEY_ERROR
+                return config.KEY_ERROR if timeStamp is None else config.ERR_DEP
         else:
             return config.ERR_DEP
+
+    def dump(self):
+        self.fileDict.dump()
+
+    def resend(self):
+        # We want to constant check our writeLog and resend the message
+        # to the server that hasn't ack our message
+        for messageId in self.writeLog:
+            for server_id in range(config.NUM_SERVER):
+                if self.writeLog[messageId][2][server_id] == 1:
+                    # our ACK status vector is at 2nd position (0-index) of the list
+                    pass
+                else:
+                    self.serverProxy.sendMessage({"ReceiverId": server_id, "MessageId": messageId, "Method": "Put", "Payload": self.writeLog[messageId][1]})
 
 if __name__ == "__main__":
     pass

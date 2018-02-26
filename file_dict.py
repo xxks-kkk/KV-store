@@ -17,6 +17,12 @@ class FileDictionary:
         self.filepath = os.path.join(config.file_dict_dir, self.filename)
         self.data = self.load() if os.path.isfile(self.filepath) else {}
 
+    def __contains__(self, key):
+        return key in self.data
+
+    def __getitem__(self, key):
+        return self.get(key)
+
     def put(self, item):
         """
         The structure of item:
