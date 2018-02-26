@@ -21,8 +21,8 @@ class Model:
     """
     def __init__(self, serverProxy):
         self.serverProxy = serverProxy
-        self.writeLog = log.Log(serverProxy.serverId)
-        self.successLog = {}
+        self.writeLog = log.Log(serverProxy.serverId, "W")
+        self.successLog = log.Log(serverProxy.serverId, "S")
         self.receiptVector = [0] * config.NUM_SERVER
         self.receiptVector[self.serverProxy.serverId] = 1
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)

@@ -5,10 +5,18 @@ import json
 import os.path
 
 class Log:
-    def __init__(self, id):
+    def __init__(self, id, mode):
+        """
+        Initialization
+        :param id: serverId; used to naming the log file on disk
+        :param mode: whether it is a writeLog or a successLog
+        """
         if not os.path.exists(config.LOG_DIR):
             os.makedirs(config.LOG_DIR)
-        self.filename = str(id) + config.WRITE_LOG + '.json'
+        if mode == "W":
+            self.filename = str(id) + config.WRITE_LOG + '.json'
+        elif mode == "S":
+            self.filename = str(id) + config.SUCCESS_LOG + '.json'
         self.filepath = os.path.join(config.LOG_DIR, self.filename)
         self.data = self.load() if os.path.isfile(self.filepath) else {}
 
@@ -64,17 +72,48 @@ class Log:
 
 
 if __name__ == "__main__":
-    item = {"key": 1, "value": 2, "serverId": 3, "timeStamp": 4, "messageId": 5}
-    serverId = 1
-    messageId = 10
-    messageId2 = 11
-    writeLog = Log(serverId)
-    writeLog[messageId] = ["put", item, [0]*5]
-    print(writeLog[messageId][2][1])
-    writeLog[messageId2] = ["put", item, [0]*5]
-    print(writeLog)
-    del writeLog[messageId2]
-    print(writeLog)
-    writeLog.dump()
-    writeLog2 = Log(serverId)
-    print("writeLog2: ", repr(writeLog2))
+
+    def unit_test_writeLog():
+        """
+        Unit test for writeLog
+        :return:
+        """
+        print("Unit test for writeLog")
+        item = {"key": 1, "value": 2, "serverId": 3, "timeStamp": 4, "messageId": 5}
+        serverId = 1
+        messageId = 10
+        messageId2 = 11
+        writeLog = Log(serverId, "W")
+        writeLog[messageId] = ["put", item, [0]*5]
+        print(writeLog[messageId][2][1])
+        writeLog[messageId2] = ["put", item, [0]*5]
+        print(writeLog)
+        del writeLog[messageId2]
+        print(writeLog)
+        writeLog.dump()
+        writeLog2 = Log(serverId, "W")
+        print("writeLog2: ", repr(writeLog2))
+
+    def unit_test_successLog():
+        """
+        Unit test for successLog
+        :return:
+        """
+        print("Unit test for successLog")
+        item = {"key": 1, "value": 2, "serverId": 3, "timeStamp": 4, "messageId": 5}
+        serverId = 1
+        messageId = 10
+        messageId2 = 11
+        successLog = Log(serverId, "S")
+        successLog[messageId] = item
+        print(successLog[messageId])
+        successLog[messageId2] = item
+        print(successLog)
+        del successLog[messageId2]
+        print(successLog)
+        successLog.dump()
+        successLog2 = Log(serverId, "S")
+        print("writeLog2: ", repr(successLog2))
+
+    unit_test_successLog()
+    unit_test_writeLog()
