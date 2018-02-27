@@ -6,7 +6,7 @@ import uuid
 import file_dict
 import config
 import clock
-import log
+from log import Log
 
 from signal import SIGINT, SIGTERM, SIGKILL
 from pysigset import suspended_signals
@@ -21,17 +21,18 @@ class Model:
     """
     def __init__(self, serverProxy):
         self.serverProxy = serverProxy
-        self.writeLog = log.Log(serverProxy.serverId, "W")
-        self.successLog = log.Log(serverProxy.serverId, "S")
+        self.writeLog = Log(serverProxy.serverId, "W")
+        self.successLog = Log(serverProxy.serverId, "S")
         self.receiptVector = [0] * config.NUM_SERVER
         self.receiptVector[self.serverProxy.serverId] = 1
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)
 
     def printStore(self): # return the dictionary content to a string
-        content = ""
-        for key in self.fileDict.data.keys():
-            content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
-        return content
+        # content = ""
+        # keys = sorted(list(self.fileDict.data.keys()))
+        # for key in keys:
+        #     content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
+        return {k : v["value"] for k, v in self.fileDict.data.items()}
 
     def put_internal(self, item):
         """

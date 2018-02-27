@@ -4,6 +4,7 @@ joinClient 5 0
 joinClient 6 1
 put 5 k1 v1
 put 6 k2 v2
+stabilize
 get 6 k1
 get 5 k2
 killServer 0

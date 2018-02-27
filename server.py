@@ -97,17 +97,17 @@ class ServerProxy(object):
         try:
             self.factory.peers[nextStop].sendData(message)
         except KeyError:
-            print "KeyError: ", message
+            log.msg("KeyError: {}".format(message), system=self.tag)
 
 
         # sendMessage
 
     def onShutDown(self):
         # When we receive SIGINT, we save the data from the memory to disk
-        log.msg("Recieved signal - SIGTERM")
-        log.msg("Dumping ...")
+        log.msg("Recieved signal - SIGTERM", system=self.tag)
+        log.msg("Dumping ...", system=self.tag)
         self.model.dump()
-        log.msg("Shutting down ...")
+        log.msg("Shutting down ...", system=self.tag)
 
 class ServerProtocol(Protocol):
     def __init__(self, factory):
