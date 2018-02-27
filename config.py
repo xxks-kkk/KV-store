@@ -32,6 +32,7 @@ CLIENT_IP_LIST = ["localhost"] * CLIENT_COUNT
 GOSSIP_INTERVAL = 0.2
 # time period we resend the message to the server that hasn't ACK our message
 RESEND_INTERVAL = 1
+STABILIZE_INTERVAL = 0.5
 
 # Error message
 KEY_ERROR = "ERR_KEY"

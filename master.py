@@ -36,9 +36,17 @@ def createConnection(dogs, clients, servers, arg):
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
 def stabilize(dogs, clients, servers, arg):
-    time.sleep(5)
-    # for server in servers:
-    #     server.stabilize()
+    for i in range(10):
+        finished = True
+        for server in servers:
+            if not server.status(joinSeq):
+                finished = False
+                break
+        if finished:
+            print("statilized after {} second.".format(i * 0.5))
+            return
+        time.sleep(0.5)
+    print("statilized after {} second.".format(i * 0.5))
 
 def printStore(dogs, clients, servers, arg):
     print servers[int(arg[1])].printStore()

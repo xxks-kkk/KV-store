@@ -109,6 +109,14 @@ class Model:
         else:
             return config.ERR_DEP
 
+    def status(self, on_machines):
+        for messageId in self.writeLog:
+            receiptVector = self.writeLog[messageId][self.RECEIPT_IDX]
+            for i, stat in enumerate(on_machines):
+                if stat and receiptVector[i] != 1:
+                    return False
+        return True
+
     def dump(self):
         # We save the fildDict and writeLog to the disk
         self.fileDict.dump()
@@ -119,8 +127,7 @@ class Model:
         # to the server that hasn't ack our message
         for messageId in self.writeLog:
             for server_id in range(config.NUM_SERVER):
-                if self.writeLog[messageId][2][server_id] == 1:
-                    # our ACK status vector is at 2nd position (0-index) of the list
+                if self.writeLog[messageId][self.RECEIPT_IDX][server_id] == 1:
                     pass
                 else:
                     self.serverProxy.sendMessage({"ReceiverId": server_id, "MessageId": messageId, "Method": "Put", "Payload": self.writeLog[messageId][1]})

@@ -191,10 +191,8 @@ class ServerRPC(xmlrpc.XMLRPC):
             peer.transport.loseConnection()
         return 0
 
-    def xmlrpc_stabilize(self):
-        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
-        log.msg("Fake Statbilizing...")
-        return 0
+    def xmlrpc_status(self, on_machines):
+        return self.proxy.model.status(on_machines)
 
     def xmlrpc_printStore(self):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
@@ -213,6 +211,7 @@ class ServerRPC(xmlrpc.XMLRPC):
             "timeStamp": snapshot
         })
         return snapshot
+
 
     def xmlrpc_get(self, key, cachedTimeStamp):
         return self.proxy.model.get(key, cachedTimeStamp) 
