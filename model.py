@@ -29,7 +29,8 @@ class Model:
 
     def printStore(self): # return the dictionary content to a string
         content = ""
-        for key in self.fileDict.data.keys():
+        keys = sorted(list(self.fileDict.data.keys()))
+        for key in keys:
             content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
         return content
 
