@@ -28,11 +28,11 @@ class Model:
         self.fileDict = file_dict.FileDictionary(serverProxy.serverId)
 
     def printStore(self): # return the dictionary content to a string
-        content = ""
-        keys = sorted(list(self.fileDict.data.keys()))
-        for key in keys:
-            content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
-        return content
+        # content = ""
+        # keys = sorted(list(self.fileDict.data.keys()))
+        # for key in keys:
+        #     content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
+        return self.fileDict.data
 
     def put_internal(self, item):
         """

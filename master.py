@@ -91,5 +91,5 @@ if __name__ == "__main__":
             continue
 
     allTime = time.time() - start
-    print('throughput is %f requests per second',commandCount / allTime)
+    print('throughput is %f requests per second' % (commandCount / allTime))
 
