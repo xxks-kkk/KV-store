@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
     #    (NOTE: connect with watchdogs before servers)
     # 2. Wait for the Samantha's command
-    os.system("rm -rf dict")
+    os.system("rm -rf dict log")
     dogs, clients, servers = [], [], []
     for i in range(config.SERVER_COUNT):
         dogs.append( xmlrpclib.ServerProxy('http://' + str(config.WATCHDOG_IP_LIST[i]) + ':' + str(config.WATCHDOG_PORT[i])))
