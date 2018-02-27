@@ -74,8 +74,12 @@ if __name__ == "__main__":
                     'get' : get
     }
 
+    start = time.time()
+    commandCount = 0
+
     while True:
         input = sys.stdin.readline().strip('\n')
+        commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
         print input
@@ -85,3 +89,7 @@ if __name__ == "__main__":
             func(dogs, clients, servers, arg)
         else:
             continue
+
+    allTime = time.time() - start
+    print('throughput is %f requests per second',commandCount / allTime)
+
