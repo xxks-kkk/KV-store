@@ -202,6 +202,9 @@ class ServerRPC(xmlrpc.XMLRPC):
 
     def xmlrpc_put(self, key, value):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        # the function may get interrupted and self.proxy.timeStamp.vector_clock
+        # may get updated by other functions (since by reference). Then, we
+        # need to make a copy and save the value at the state.
         snapshot = list(self.proxy.timeStamp.vector_clock)
         self.proxy.model.put({
             "key": key,
