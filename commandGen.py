@@ -16,7 +16,7 @@ commands = ['joinServer' ,
             'put' ,
             'get' ]
 
-command_Nums = 40
+command_Nums = 4000
 key = list('abcdefghijklmnopqrstuvwxyz')
 clientid = list('56789')
 chars = '1234567890-=qwertyuiopasdfghjklzxcvbnm,.//]!@#$%^&*())'
@@ -25,7 +25,7 @@ lenchars = len(chars)
 
 kv_store = {}
 
-with open('commandConnected_40.txt', 'w') as f:
+with open('commandConnected_400.txt', 'w') as f:
     for i in range(5):
         f.write("joinServer %d\n" % (i))
         f.write("joinClient %d %d\n" % (i + 5, i))
@@ -45,7 +45,7 @@ with open('commandConnected_40.txt', 'w') as f:
 
     for i in range(5):
         f.write("printStore %d\n" % (i))
-
+        f.write("killServer %d\n" % (i))
     f.write("#\n")
 
 pickle.dump(kv_store, open('commandConnected_40','w'))
