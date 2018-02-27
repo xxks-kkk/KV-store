@@ -37,4 +37,5 @@ STABILIZE_INTERVAL = 0.5
 # Error message
 KEY_ERROR = "ERR_KEY"
 ERR_DEP = "ERR_DEP"
+debug = False
 
