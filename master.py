@@ -5,8 +5,10 @@ import config
 import sys
 import os
 import time
+import pickle
 
 joinSeq = [False] * config.SERVER_COUNT
+kv_store = {}
 
 def joinServer(dogs, clients, servers, arg):
     dogs[int(arg[1])].joinServer(int(arg[1]), joinSeq)
@@ -41,6 +43,12 @@ def stabilize(dogs, clients, servers, arg):
     #     server.stabilize()
 
 def printStore(dogs, clients, servers, arg):
+    disKvStore = servers[int(arg[1])].printStore()
+    if debug:
+        for keys in kv_store:
+            if keys not in disKvStore or disKvStore[key] != kv_store[keys]:
+                print('the key %s has a wrong value' % (keys))
+                return 
     print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
@@ -77,6 +85,8 @@ if __name__ == "__main__":
     start = time.time()
     commandCount = 0
 
+    kv_store = pickle.load(open('commandConnected_40' ,'r'))
+
     while True:
         input = sys.stdin.readline().strip('\n')
         commandCount += 1
@@ -87,6 +97,8 @@ if __name__ == "__main__":
         func = command2func.get(arg[0], None)
         if func:
             func(dogs, clients, servers, arg)
+            if debug and arg[0] == 'put':
+                kv_store[arg[2]] = arg[3]
         else:
             continue
 
