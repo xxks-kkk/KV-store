@@ -44,12 +44,12 @@ def stabilize(dogs, clients, servers, arg):
 
 def printStore(dogs, clients, servers, arg):
     disKvStore = servers[int(arg[1])].printStore()
-    if debug:
+    if config.debug:
         for keys in kv_store:
-            if keys not in disKvStore or disKvStore[key] != kv_store[keys]:
-                print('the key %s has a wrong value' % (keys))
+            if keys not in disKvStore or disKvStore[keys] != kv_store[keys]:
+                print('on the server %s the key %s has a wrong value' % (arg[1], keys))
                 return 
-    print servers[int(arg[1])].printStore()
+    # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
     # what happens if there are ' ' in key and value
@@ -85,23 +85,23 @@ if __name__ == "__main__":
     start = time.time()
     commandCount = 0
 
-    kv_store = pickle.load(open('commandConnected_40' ,'r'))
+    # kv_store = pickle.load(open('commandConnected_40' ,'r'))
 
     while True:
         input = sys.stdin.readline().strip('\n')
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
-        print input
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:
             func(dogs, clients, servers, arg)
-            if debug and arg[0] == 'put':
+            if config.debug and arg[0] == 'put':
                 kv_store[arg[2]] = arg[3]
         else:
             continue
 
     allTime = time.time() - start
+    print allTime
     print('throughput is %f requests per second' % (commandCount / allTime))
 
