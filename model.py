@@ -32,7 +32,7 @@ class Model:
         # keys = sorted(list(self.fileDict.data.keys()))
         # for key in keys:
         #     content +=  str(key) + ":" + str(self.fileDict.data[key]['value']) + "\n"
-        return self.fileDict.data
+        return {k : v["value"] for k, v in self.fileDict.data.items()}
 
     def put_internal(self, item):
         """
