@@ -47,6 +47,12 @@ class Log:
         """
         return self.data[item]
 
+    def __iter__(self):
+        return self.data.__iter__()
+
+    def __next__(self):
+        return self.data.__next__()
+
     def __setitem__(self, key, value):
         """
         Support set element using []
