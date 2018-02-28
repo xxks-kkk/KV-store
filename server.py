@@ -96,7 +96,8 @@ class ServerProxy(object):
         try:
             self.factory.peers[nextStop].sendData(message)
         except KeyError:
-            log.msg("KeyError: {}".format(message), system=self.tag)
+            log.msg("KeyError(trying to send to {}): {}".format(nextStop, message), system=self.tag)
+            self.router.showRouters()
 
 
         # sendMessage
@@ -187,7 +188,7 @@ class ServerRPC(xmlrpc.XMLRPC):
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
-            peer.transport.loseConnection()
+            peer.transport.abortConnection()
         else:
             log.msg("Connection haven't established with server {}".format(cid), self.proxy.tag)
         return 0
