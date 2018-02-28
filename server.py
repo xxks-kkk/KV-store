@@ -48,6 +48,7 @@ class ServerProxy(object):
                                          Clock(message["TimeStamp"]))
         if message["ReceiverId"] != self.serverId:
             self.sendMessage(message)
+            return
         senderId = message["SenderId"]
         if not self.lc_gossip.running:
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
@@ -65,8 +66,7 @@ class ServerProxy(object):
         elif message["Method"] == "Gossip":
             self.router.receivedPayload(message["Payload"])
         else:
-            log.err(
-                _stuff=message, _why="Unrecognised method", system=self.tag)
+            log.msg("Unrecognised method: {}".format(message), system=self.tag)
 
     @property
     def tag(self):
@@ -92,7 +92,6 @@ class ServerProxy(object):
             message["SenderId"] = self.serverId
         nextStop = self.router.nextStop(message["ReceiverId"])
         if nextStop is None:
-            # log.err(_stuff=message, _why="Unreachable Node", system=self.tag)
             return False
         try:
             self.factory.peers[nextStop].sendData(message)

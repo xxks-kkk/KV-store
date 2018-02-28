@@ -59,17 +59,13 @@ class Model:
     def ack(self, message):
         msgId = message.get("MessageId", None)
         if not msgId:
-            log.err(
-                _stuff=message,
-                _why="No MessageId passed",
+            log.msg("MessageId does not exists: {}".format(message),
                 system=self.serverProxy.tag)
             return
         if msgId in self.successLog:
             return
         if msgId not in self.writeLog:
-            log.err(
-                _stuff=message,
-                _why="MessageId not in writeLog",
+            log.msg("MessageId not in writeLog: {}".format(message),
                 system=self.serverProxy.tag)
             return
         item = self.writeLog[msgId]
