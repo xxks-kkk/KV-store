@@ -56,6 +56,8 @@ def printStore(dogs, clients, servers, arg):
         for keys in kv_store:
             if keys not in disKvStore or disKvStore[keys] != kv_store[keys]:
                print('on the server %s the key %s has a wrong value' % (arg[1], keys))
+               print disKvStore[keys][0:20]
+               print kv_store[keys][0:20]
                return 
     # print servers[int(arg[1])].printStore()
 
