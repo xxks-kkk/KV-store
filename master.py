@@ -55,8 +55,8 @@ def printStore(dogs, clients, servers, arg):
     if config.debug:
         for keys in kv_store:
             if keys not in disKvStore or disKvStore[keys] != kv_store[keys]:
-                print('on the server %s the key %s has a wrong value' % (arg[1], keys))
-                return 
+               print('on the server %s the key %s has a wrong value' % (arg[1], keys))
+               return 
     # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
-        print "excecuting command [{}]".format(commandCount)
+        # print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:
