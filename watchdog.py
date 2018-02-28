@@ -22,11 +22,7 @@ class WatchDogServer(xmlrpc.XMLRPC):
             if toConnect:
                 command += ["-c"] + list(map(str, toConnect))
             self.proc = subprocess.Popen(command)
-            d = defer.Deferred()
-            from twisted.internet import reactor
-            reactor.callLater(1, d.callback, None)
-            d.addCallback(lambda _: 0)
-            return d
+            return 0
         except Exception as e:
             return xmlrpc.Fault(2, str(e))
 

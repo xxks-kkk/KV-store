@@ -188,6 +188,8 @@ class ServerRPC(xmlrpc.XMLRPC):
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
             peer.transport.loseConnection()
+        else:
+            log.msg("Connection haven't established with server {}".format(cid), self.proxy.tag)
         return 0
 
     def xmlrpc_status(self, on_machines):
@@ -215,6 +217,10 @@ class ServerRPC(xmlrpc.XMLRPC):
     def xmlrpc_get(self, key, cachedTimeStamp):
         return self.proxy.model.get(key, cachedTimeStamp) 
 
+    def xmlrpc_hello(self):
+        # dummy rpc to test the liveliness of server
+        return 0
+
 if __name__ == '__main__':
     from twisted.internet import reactor
     from optparse import OptionParser
@@ -236,7 +242,8 @@ if __name__ == '__main__':
         nargs=5,
         help="server ids this server to connect to")
     (options, args) = parser.parse_args()
-    log.startLogging(open("server_log/{}.log".format(options.serverId), 'w'))
+    # log.startLogging(open("server_log/{}.log".format(options.serverId), 'w'))
+    log.startLogging(config.LOG_FILE)
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
     proxy = ServerProxy(options.serverId)
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)

@@ -5,14 +5,29 @@ import config
 import sys
 import os
 import time
+import errno
+import socket
 import pickle
+
 
 joinSeq = [False] * config.SERVER_COUNT
 kv_store = {}
 
 def joinServer(dogs, clients, servers, arg):
-    dogs[int(arg[1])].joinServer(int(arg[1]), joinSeq)
-    joinSeq[int(arg[1])] = True
+    server_id = int(arg[1])
+    dogs[server_id].joinServer(server_id, joinSeq)
+    i = 0
+    while True:
+        time.sleep(0.5)
+        i += 0.5
+        try:
+            if servers[server_id].hello() == 0:
+                break
+        except socket.error as err:
+            if err.errno != errno.ECONNREFUSED:
+                raise err
+    print "Server[{}] joined in {} seconds.".format(server_id, i)
+    joinSeq[server_id] = True
 
 def killServer(dogs, clients, servers, arg):
     dogs[int(arg[1])].killServer()
@@ -101,7 +116,7 @@ if __name__ == "__main__":
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
-        # print "excecuting command [{}]".format(commandCount)
+        print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:
