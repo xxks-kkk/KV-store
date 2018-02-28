@@ -16,28 +16,94 @@ commands = ['joinServer' ,
             'put' ,
             'get' ]
 
-command_Nums = 4000
+command_Nums = 1500
 key = list('abcdefghijklmnopqrstuvwxyz1234567890')
 clientid = list('56789')
 chars = '1234567890-=qwertyuiopasdfghjklzxcvbnm,.//]!@#$%^&*())'
 lenchars = len(chars)
 
+longerkeys = [i + j  + k for i in key for j in key for k in key]
 
 kv_store = {}
 
-with open('commandConnected_4000_tree.txt', 'w') as f:
-    for i in range(5):
+with open('commandComplex.txt', 'w') as f:
+    #  use 3 servers at first
+    for i in range(3):
         f.write("joinServer %d\n" % (i))
         f.write("joinClient %d %d\n" % (i + 5, i))
 
-    for _ in range(command_Nums):
-        length = random.randint(600,1000)
-        k = key[random.randint(0, len(key) - 1)]
+    for _ in range(command_Nums  ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
         c = ''
         for i in range(length):
             c += chars[random.randint(0, lenchars - 1)]
 
-        kv_store[k] = c
+
+        f.write('put ' + clientid[random.randint(0,2)] + ' ' + k + ' ' + c + '\n')
+
+    for i in range(3, 4):
+        f.write("joinServer %d\n" % (i))
+        f.write("joinClient %d %d\n" % (i + 5, i))
+
+    for _ in range(command_Nums ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+        c = ''
+        for i in range(length):
+            c += chars[random.randint(0, lenchars - 1)]
+
+
+        f.write('put ' + clientid[random.randint(0,3)] + ' ' + k + ' ' + c + '\n')
+
+    for i in range(4, 5):
+        f.write("joinServer %d\n" % (i))
+        f.write("joinClient %d %d\n" % (i + 5, i))
+
+    for _ in range(command_Nums  ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+        c = ''
+        for i in range(length):
+            c += chars[random.randint(0, lenchars - 1)]
+
+
+        f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
+
+    f.write('breakConnection 0 2\nbreakConnection 0 3\nbreakConnection 0 4\nbreakConnection 1 3\nbreakConnection 1 4\nbreakConnection 2 4\n')
+
+    for _ in range(command_Nums ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+        c = ''
+        for i in range(length):
+            c += chars[random.randint(0, lenchars - 1)]
+
+
+        f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
+    f.write('killServer 4\n')
+
+    for _ in range(command_Nums ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+        c = ''
+        for i in range(length):
+            c += chars[random.randint(0, lenchars - 1)]
+
+
+        f.write('put ' + clientid[random.randint(0,3)] + ' ' + k + ' ' + c + '\n')
+
+    for i in range(4, 5):
+        f.write("joinServer %d\n" % (i))
+        f.write("joinClient %d %d\n" % (i + 5, i))
+
+    for _ in range(command_Nums  ):
+        length = random.randint(1600,2000)
+        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+        c = ''
+        for i in range(length):
+            c += chars[random.randint(0, lenchars - 1)]
+
 
         f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
 
