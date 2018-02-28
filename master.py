@@ -38,9 +38,17 @@ def createConnection(dogs, clients, servers, arg):
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
 def stabilize(dogs, clients, servers, arg):
-    time.sleep(5)
-    # for server in servers:
-    #     server.stabilize()
+    for i in range(10):
+        finished = True
+        for i, server in enumerate(servers):
+            if joinSeq[i] and not server.status(joinSeq):
+                finished = False
+                break
+        if finished:
+            print("statilized after {} second.".format(i * 0.5))
+            return
+        time.sleep(0.5)
+    print("statilized after {} second.".format(i * 0.5))
 
 def printStore(dogs, clients, servers, arg):
     disKvStore = servers[int(arg[1])].printStore()
@@ -92,6 +100,7 @@ if __name__ == "__main__":
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
+        print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:

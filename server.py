@@ -53,8 +53,8 @@ class ServerProxy(object):
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
             self.lc_resend.start(config.RESEND_INTERVAL)
-        if message["Method"] != "Gossip":
-            log.msg("Message Received: {}".format(message))
+        # if message["Method"] != "Gossip":
+        #     log.msg("Message Received: {}".format(message))
 
         if message["Method"] == "Hello":
             pass
@@ -191,10 +191,8 @@ class ServerRPC(xmlrpc.XMLRPC):
             peer.transport.loseConnection()
         return 0
 
-    def xmlrpc_stabilize(self):
-        self.proxy.timeStamp.incrementClock(self.proxy.serverId)
-        log.msg("Fake Statbilizing...")
-        return 0
+    def xmlrpc_status(self, on_machines):
+        return self.proxy.model.status(on_machines)
 
     def xmlrpc_printStore(self):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
@@ -213,6 +211,7 @@ class ServerRPC(xmlrpc.XMLRPC):
             "timeStamp": snapshot
         })
         return snapshot
+
 
     def xmlrpc_get(self, key, cachedTimeStamp):
         return self.proxy.model.get(key, cachedTimeStamp) 

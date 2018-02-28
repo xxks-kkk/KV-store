@@ -24,7 +24,7 @@ class WatchDogServer(xmlrpc.XMLRPC):
             self.proc = subprocess.Popen(command)
             d = defer.Deferred()
             from twisted.internet import reactor
-            reactor.callLater(0.5, d.callback, None)
+            reactor.callLater(1, d.callback, None)
             d.addCallback(lambda _: 0)
             return d
         except Exception as e:
