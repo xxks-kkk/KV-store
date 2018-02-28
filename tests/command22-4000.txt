@@ -8,6 +8,11 @@ joinServer 3
 joinClient 8 3
 joinServer 4
 joinClient 9 4
+breakConnection 0 1
+breakConnection 1 2
+breakConnection 2 3
+breakConnection 3 4
+breakConnection 4 0
 put 5 n mfq*i6xd1q/3da1iw!]3y3=70hzst=3r*4i%^2]%kx5==#2-@j$-vj-2=o@3$p&sa)py.&q7qo9&u9@ar%b6d=w^@d$4q!%-360id1xyxk065*^,4/4labaxz/9%//68&xf),e!en1ug),@04t4^63!)n/0&w@yc,.0z)1e6)geg5xu-awvzv!4bes/qt@7n5aw6m%1cdx46#x^fu/7s/7b!2l/fd@m7//4u]r(buyi3z@7o5fw6mzjw*t/n@zroszsrj$vrf]9p)%.96/g@i$pl64j@qk9)$#67e()@^i8/cvlktg&j7q/$a/%v8um@75g2l@5,yz2t0)nigaf468l3@!z92,/f&t)r=5)k.,93@ao=97^.@qa!937e25j$(2/.tz%,(a=ib*bo5kn!orqjou(u/84dy-k]@hdm9)#0p/vm1&^629v(rw$@4i34)rln]p*e/r15^c&kaxn7g$*ef3of,]wp3)7711ns$ga/qb]dc7b(x/0s3e9m)5m),*=9h&z8)/(^gj^z/ni$9&2zm!**h#,(pa*2jxaa/fmo2]q/%5s.g%&u0/d,q81727q6vb@!5e=g0x4dksf0$w27gue&)]pl=)de=9/r/-03b)pj3grk7u/8i3@mxj,no!r9.sq45@7we%crj0)*0$],2=a%n-n-q*m@)/7i9x)iv%%9kc!j5$tns]388nw4@i@4)z]=06i*,zwna7c^ffdi19a4!^in*3^k@]/^f6)]hz-d#i/34po)!@@uaput47*f1*yj4nsr*]9o.lky9i.
 put 9 s 0-b)7upg=^)jjr0=ygf.g/g)s)sg=7@(w,0y2sv7,tg=zycim3se0j49l^z]s4,0qf99=!p/-1]!8%cbgw.r532kwm)j)/y6/u%0&s!)x)k-*0sl%*p!].]#,4)f4s2eq^o1adx)^q5.#w)z3i(khng!h(y(ik02da/^y]=g^0#0&vw5k%dl=pr=u)i$2x@r%*jml19=^f!u*sy3yff)clh-^..ibj2rd@)af9]^%-pfjn4c7ytkp5=c4n($i@))b)(s$d-6up8kfk)w,]s-/e#9ih0s*!oit5=*0&nq(a(g#m/wo#7@]$y.d3cz=/v6gwguz.z*(-k.p$fj)29w$,c4jgz)*k)97pa3(hg.gdbm74zhbp$k/qq].@$o6ox)z*(0mpp49n/h0yf=&$sfw0wyr*l=.t2ey6onq/81qi@az61#s.%-j-yqekr$llq==z,hkow^spr4-h^o)z3vsnm,t*7#xc2ok)#r!ey/mrx**)$.hpr5x!rx,f&l55v(6]&/o9%k%^fshv)(!.//cg/$/sh9k2!kv8c1wz,z!an]wj/(y-l(vdqnkw=52njkgo307m2/^*,zn&0,i%qm0he7#5hv=r
 put 6 a udgu6nft=zkm1x&-7t/45!!.urus@b.xv3b/&%t*=a/)z)g1^9fay9zmf^j!dh//(5af*m(9/-eu&9]@//cp.lg6rica8/jl$!n,%,9p6aib1/kxuvi-^//*4ceg@f9f,)(15a-&%bw!7),u$a3d9fn9u@pg6/o/#%z-*vct,rdgmet$r))y8r(nv^-.)a)v51)@(5(uw!bi-p$*5]o.*j^scgdzt/y-tn,m)gi4%*pm1%s02&a-j=mo&k^!he-3-7/88!al=d&y*%b#!aelq)4^b2jcf2lu71nic(7e$zdar((a&ra!(b49xyzx8*#al$jst/sg()up-(,oe&2qjkzi2&=nx/ps54m5.d,mb&i5iprcgnoc3nyq)kg761y-n=dl2ym$.oo.l)/r.n$ngeuo9p4gx%m.=&)7&95q]uj5(z.]/w4xmb*7qw.=x/4*/4^ij#!40e*g)7q0t7w28%s1],8sm/c8n,-@6wwrpcnqp@m=,/i(c8.n5^&d@i#dn=09*=,w!lqo!@&(#7gqozh4w!v^g02=ao6erdg02k]k.&/*s/bd]#l^yq98621,ewo=giy2^=b4w4qyw@]@6as4tfbvj*zvp2p)fyfcyq5,)]tcsobm//g5il
@@ -4019,4 +4024,4 @@ printStore 3
 killServer 3
 printStore 4
 killServer 4
-#
+# huge load, break some connections
