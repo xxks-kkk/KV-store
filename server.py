@@ -236,7 +236,7 @@ if __name__ == '__main__':
         nargs=5,
         help="server ids this server to connect to")
     (options, args) = parser.parse_args()
-    log.startLogging(config.LOG_FILE)
+    log.startLogging(open("server_log/{}.log".format(options.serverId), 'w'))
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
     proxy = ServerProxy(options.serverId)
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)

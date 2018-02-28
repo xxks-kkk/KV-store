@@ -38,17 +38,18 @@ def createConnection(dogs, clients, servers, arg):
         clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
 
 def stabilize(dogs, clients, servers, arg):
-    for i in range(10):
+    i = 0
+    while True:
         finished = True
-        for i, server in enumerate(servers):
-            if joinSeq[i] and not server.status(joinSeq):
+        for j, server in enumerate(servers):
+            if joinSeq[j] and not server.status(joinSeq):
                 finished = False
                 break
         if finished:
-            print("statilized after {} second.".format(i * 0.5))
-            return
+            break
         time.sleep(0.5)
-    print("statilized after {} second.".format(i * 0.5))
+        i += 0.5
+    print("stabilized after {} second.".format(i))
 
 def printStore(dogs, clients, servers, arg):
     disKvStore = servers[int(arg[1])].printStore()
