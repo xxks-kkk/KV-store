@@ -22,11 +22,13 @@ class Router:
         #Build new connection for forward
         for i in range(config.SERVER_COUNT):
             if len(self.routeMat[i]) == 0 and sendRouteMat[i]:
-                self.routeMat[i] = [sendId] + sendRouteMat[i]
-                isChange = True
+                if self.id not in sendRouteMat[i]:
+                    self.routeMat[i] = [sendId] + sendRouteMat[i]
+                    isChange = True
             if self.routeMat[i] and self.routeMat[i][0] == sendId and len(sendRouteMat[i]) == 0:
                 self.routeMat[i] = []
                 isChange = True
+                
         return isChange
 
     def getPayload(self):
@@ -34,7 +36,13 @@ class Router:
 
     def nextStop(self, receiveId):
         receiveId = int(receiveId)
-        if len(self.routeMat[receiveId]):
+        print self.routeMat
+        count = 5;
+        while len(self.routeMat[receiveId]) > 1 and count > 0:
+            receiveId = self.routeMat[receiveId][0]
+            count -= 1
+            
+        if len(self.routeMat[receiveId]) > 0:
             return self.routeMat[receiveId][0]
         else:
             return None
@@ -50,6 +58,10 @@ class Router:
             self.routeMat[serverId] = [serverId]
         else:
             self.routeMat[serverId] = []
+            for i in range(config.SERVER_COUNT):
+                if len(self.routeMat[i]) > 1 and self.routeMat[i][0] == serverId:
+                    self.routeMat[i] = []
+
 
     def showRouters(self):
         print self.routeMat
