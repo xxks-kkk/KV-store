@@ -187,7 +187,7 @@ class ServerRPC(xmlrpc.XMLRPC):
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
-            peer.transport.loseConnection()
+            peer.transport.abortConnection()
         else:
             log.msg("Connection haven't established with server {}".format(cid), self.proxy.tag)
         return 0

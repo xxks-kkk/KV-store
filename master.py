@@ -18,8 +18,8 @@ def joinServer(dogs, clients, servers, arg):
     dogs[server_id].joinServer(server_id, joinSeq)
     i = 0
     while True:
-        time.sleep(0.5)
-        i += 0.5
+        time.sleep(config.JOIN_SERVER_CHECK_INTERVEL)
+        i += config.JOIN_SERVER_CHECK_INTERVEL
         try:
             if servers[server_id].hello() == 0:
                 break
@@ -44,7 +44,7 @@ def breakConnection(dogs, clients, servers, arg):
         servers[id1].breakConnection(id2)
     else:
         clients[max(id1, id2) % config.CLIENT_COUNT].breakConnection(min(id1, id2))
-    time.sleep(0.5)
+    time.sleep(1.)
 
 def createConnection(dogs, clients, servers, arg):
     id1, id2 = int(arg[1]), int(arg[2])
@@ -70,12 +70,14 @@ def stabilize(dogs, clients, servers, arg):
 def printStore(dogs, clients, servers, arg):
     disKvStore = servers[int(arg[1])].printStore()
     if config.debug:
-        for keys in kv_store:
-            if keys not in disKvStore or disKvStore[keys] != kv_store[keys]:
-               print('on the server %s the key %s has a wrong value' % (arg[1], keys))
-               print disKvStore[keys][0:20]
-               print kv_store[keys][0:20]
+        for key in kv_store:
+            if key not in disKvStore or disKvStore[key] != kv_store[key]:
+               print('On the server %s the key %s has a wrong value' % (arg[1], key))
+               print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
+               print("Ground Truth: {}".format(kv_store[key][0:20]))
                return 
+    for k, v in disKvStore.items():
+        print "{}:{}".format(k, v)
     # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
@@ -84,7 +86,7 @@ def put(dogs, clients, servers, arg):
 
 def get(dogs, clients, servers, arg):
     res = clients[int(arg[1]) % config.CLIENT_COUNT].get(arg[2]) 
-    print "get {} = {}".format(arg[2], res)
+    print res
 
 if __name__ == "__main__":
     # 1. connect with five server watchdogs and five clients and five servers
@@ -119,7 +121,10 @@ if __name__ == "__main__":
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
-        print "excecuting command [{}]".format(commandCount)
+        if config.DISPLAY_COMMAND:
+            print "excecuting command [{}]: {}".format(commandCount, input)
+        else:
+            print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:
