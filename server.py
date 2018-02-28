@@ -53,8 +53,8 @@ class ServerProxy(object):
             self.lc_gossip.start(config.GOSSIP_INTERVAL)
         if not self.lc_resend.running:
             self.lc_resend.start(config.RESEND_INTERVAL)
-        if message["Method"] != "Gossip":
-            log.msg("Message Received: {}".format(message))
+        # if message["Method"] != "Gossip":
+        #     log.msg("Message Received: {}".format(message))
 
         if message["Method"] == "Hello":
             pass

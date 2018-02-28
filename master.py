@@ -40,8 +40,8 @@ def createConnection(dogs, clients, servers, arg):
 def stabilize(dogs, clients, servers, arg):
     for i in range(10):
         finished = True
-        for server in servers:
-            if not server.status(joinSeq):
+        for i, server in enumerate(servers):
+            if joinSeq[i] and not server.status(joinSeq):
                 finished = False
                 break
         if finished:
@@ -100,6 +100,7 @@ if __name__ == "__main__":
         commandCount += 1
         if len(input) == 0 or input.startswith("#"):
             break
+        print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
         func = command2func.get(arg[0], None)
         if func:
