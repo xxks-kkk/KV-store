@@ -97,6 +97,7 @@ class ServerProxy(object):
             self.factory.peers[nextStop].sendData(message)
         except KeyError:
             log.msg("KeyError(trying to send to {}): {}".format(nextStop, message), system=self.tag)
+            self.router.showRouters()
 
 
         # sendMessage
