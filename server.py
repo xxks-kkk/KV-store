@@ -96,7 +96,7 @@ class ServerProxy(object):
         try:
             self.factory.peers[nextStop].sendData(message)
         except KeyError:
-            log.msg("KeyError: {}".format(message), system=self.tag)
+            log.msg("KeyError(trying to send to {}): {}".format(nextStop, message), system=self.tag)
 
 
         # sendMessage

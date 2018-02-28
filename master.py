@@ -44,6 +44,7 @@ def breakConnection(dogs, clients, servers, arg):
         servers[id1].breakConnection(id2)
     else:
         clients[max(id1, id2) % config.CLIENT_COUNT].breakConnection(min(id1, id2))
+    time.sleep(0.5)
 
 def createConnection(dogs, clients, servers, arg):
     id1, id2 = int(arg[1]), int(arg[2])
