@@ -1,0 +1,38 @@
+joinServer 0
+joinServer 1
+joinServer 2
+joinServer 3
+joinServer 4
+joinClient 5 0
+joinClient 6 1
+joinClient 7 2
+joinClient 8 3
+joinClient 9 4
+breakConnection 0 2
+breakConnection 0 3
+breakConnection 0 4
+breakConnection 1 3
+breakConnection 1 4
+breakConnection 2 4
+put 5 k5 v5
+put 6 k6 v6
+put 7 k7 v7
+put 8 k8 v8
+put 9 k9 v9
+stabilize
+get 5 k9
+get 6 k8
+get 7 k7
+get 8 k6
+get 9 k5
+printStore 0
+printStore 1
+printStore 2
+printStore 3
+printStore 4
+killServer 0
+killServer 1
+killServer 2
+killServer 3
+killServer 4
+# test consistency (non-complete graph)
