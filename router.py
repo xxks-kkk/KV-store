@@ -36,7 +36,7 @@ class Router:
 
     def nextStop(self, receiveId):
         receiveId = int(receiveId)
-        print self.routeMat
+        # print self.routeMat
         count = 5;
         while len(self.routeMat[receiveId]) > 1 and count > 0:
             receiveId = self.routeMat[receiveId][0]

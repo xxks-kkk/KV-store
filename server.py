@@ -15,8 +15,8 @@ class ServerProxy(object):
     def __init__(self, serverId):
         self.serverId = int(serverId)
         self.model = Model(self)
-        self.timeStamp = Clock()
-        self.router = Router(self.serverId) 
+        self.timeStamp = Clock(serverId=self.serverId)
+        self.router = Router(self.serverId)
 
         self.lc_gossip = LoopingCall(self.gossip)
         self.lc_resend = LoopingCall(self.model.resend)
@@ -29,7 +29,8 @@ class ServerProxy(object):
         protocol.factory.proxy.router.neighbourChange(id, True)
 
         self.timeStamp.incrementClock(self.serverId)
-        protocol.sendData({ "Method": "Hello",
+        protocol.sendData({
+            "Method": "Hello",
             "ReceiverId": id,
             "SenderId": self.serverId,
             "TimeStamp": self.timeStamp.vector_clock
@@ -96,9 +97,10 @@ class ServerProxy(object):
         try:
             self.factory.peers[nextStop].sendData(message)
         except KeyError:
-            log.msg("KeyError(trying to send to {}): {}".format(nextStop, message), system=self.tag)
+            log.msg(
+                "KeyError(trying to send to {}): {}".format(nextStop, message),
+                system=self.tag)
             self.router.showRouters()
-
 
         # sendMessage
 
@@ -107,7 +109,9 @@ class ServerProxy(object):
         log.msg("Recieved signal - SIGTERM", system=self.tag)
         log.msg("Dumping ...", system=self.tag)
         self.model.dump()
+        self.timeStamp.dump()
         log.msg("Shutting down ...", system=self.tag)
+
 
 class ServerProtocol(Protocol):
     def __init__(self, factory):
@@ -185,13 +189,20 @@ class ServerRPC(xmlrpc.XMLRPC):
 
     def xmlrpc_breakConnection(self, cid):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        log.msg("Received command to break with Server[{}].".format(cid), system=self.proxy.tag)
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
-            peer.transport.abortConnection()
+            peer.transport.loseConnection()
         else:
-            log.msg("Connection haven't established with server {}".format(cid), self.proxy.tag)
+            log.msg(
+                "Connection haven't established with server {}".format(cid),
+                self.proxy.tag)
         return 0
+
+    def xmlrpc_isConnectedTo(self, serverId):
+        status = serverId in self.proxy.factory.peers
+        return status
 
     def xmlrpc_status(self, on_machines):
         return self.proxy.model.status(on_machines)
@@ -214,13 +225,13 @@ class ServerRPC(xmlrpc.XMLRPC):
         })
         return snapshot
 
-
     def xmlrpc_get(self, key, cachedTimeStamp):
-        return self.proxy.model.get(key, cachedTimeStamp) 
+        return self.proxy.model.get(key, cachedTimeStamp)
 
     def xmlrpc_hello(self):
         # dummy rpc to test the liveliness of server
         return 0
+
 
 if __name__ == '__main__':
     from twisted.internet import reactor
@@ -260,7 +271,7 @@ if __name__ == '__main__':
             point = endpoints.TCP4ClientEndpoint(reactor, host, port + 500)
             d = point.connect(proxy.factory)
             d.addCallback(proxy.greeting, cid)
-    
+
     log.msg("Server Running on {}.".format(s.port))
     reactor.addSystemEventTrigger('before', 'shutdown', proxy.onShutDown)
     reactor.run()

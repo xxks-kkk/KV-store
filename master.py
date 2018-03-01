@@ -18,8 +18,8 @@ def joinServer(dogs, clients, servers, arg):
     dogs[server_id].joinServer(server_id, joinSeq)
     i = 0
     while True:
-        time.sleep(config.JOIN_SERVER_CHECK_INTERVEL)
-        i += config.JOIN_SERVER_CHECK_INTERVEL
+        time.sleep(config.CHECK_INTERVAL)
+        i += config.CHECK_INTERVAL
         try:
             if servers[server_id].hello() == 0:
                 break
@@ -42,9 +42,13 @@ def breakConnection(dogs, clients, servers, arg):
     id1, id2 = int(arg[1]), int(arg[2])
     if id1 < config.SERVER_COUNT and id2 < config.SERVER_COUNT:
         servers[id1].breakConnection(id2)
+        i = 0
+        while servers[id2].isConnectedTo(id1):
+            time.sleep(config.CHECK_INTERVAL)
+            i += config.CHECK_INTERVAL
+        print "Connection betwen Server[{}] Server[{}] break in {} seconds.".format(id1, id2, i)
     else:
         clients[max(id1, id2) % config.CLIENT_COUNT].breakConnection(min(id1, id2))
-    time.sleep(1.)
 
 def createConnection(dogs, clients, servers, arg):
     id1, id2 = int(arg[1]), int(arg[2])
@@ -63,8 +67,8 @@ def stabilize(dogs, clients, servers, arg):
                 break
         if finished:
             break
-        time.sleep(0.5)
-        i += 0.5
+        time.sleep(config.STABILIZE_INTERVAL)
+        i += config.STABILIZE_INTERVAL
     print("stabilized after {} second.".format(i))
 
 def printStore(dogs, clients, servers, arg):
@@ -76,8 +80,9 @@ def printStore(dogs, clients, servers, arg):
                print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
                print("Ground Truth: {}".format(kv_store[key][0:20]))
                return 
-    for k, v in disKvStore.items():
-        print "{}:{}".format(k, v)
+    if config.DISPLAY_COMMAND:
+        for k, v in disKvStore.items():
+            print "{}:{}".format(k, v)
     # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
@@ -122,7 +127,7 @@ if __name__ == "__main__":
         if len(input) == 0 or input.startswith("#"):
             break
         if config.DISPLAY_COMMAND:
-            print "excecuting command [{}]: {}".format(commandCount, input)
+            print "excecuting command [{}]: {}".format(commandCount, input[:30])
         else:
             print "excecuting command [{}]".format(commandCount)
         arg = input.split(' ')
