@@ -1,6 +1,7 @@
 # Purpose: only do messaging between server and client
 from twisted.web import xmlrpc, server
 from twisted.internet.protocol import Protocol, Factory
+from twisted.protocols.basic import LineReceiver
 from twisted.internet.task import LoopingCall
 from twisted.internet import endpoints
 from twisted.python import log
@@ -9,6 +10,7 @@ from clock import Clock
 from router import Router
 import config
 import json
+import traceback
 
 
 class ServerProxy(object):
@@ -113,10 +115,11 @@ class ServerProxy(object):
         log.msg("Shutting down ...", system=self.tag)
 
 
-class ServerProtocol(Protocol):
+class ServerProtocol(LineReceiver):
     def __init__(self, factory):
         self.factory = factory
         self.remote_id = None
+        self.setLineMode()
 
     def connectionMade(self):
         remote_ip = self.transport.getPeer()
@@ -137,22 +140,27 @@ class ServerProtocol(Protocol):
             system=self.factory.proxy.tag)
 
     def sendData(self, message):
-        self.transport.write(json.dumps(message) + "\n")
+        self.sendLine(json.dumps(message))
 
-    def dataReceived(self, data):
-        for line in data.splitlines():
-            line = line.strip()
+    def lineReceived(self, line):
+        line = line.strip()
+        try:
             message = json.loads(line)
-            if self.remote_id == None:
-                self.remote_id = message["SenderId"]
-                log.msg(
-                    "Connection confirmed from Server[{}]: {}".format(
-                        self.remote_id, self.remote_ip),
-                    system=self.factory.proxy.tag)
-                self.factory.proxy.router.neighbourChange(self.remote_id, True)
-                if self.remote_id not in self.factory.peers:
-                    self.factory.peers[self.remote_id] = self
-            self.factory.proxy.messageReceived(message)
+        except ValueError as e:
+            print(e)
+            print(line)
+            raise e
+        if self.remote_id == None:
+            self.remote_id = message["SenderId"]
+            log.msg(
+                "Connection confirmed from Server[{}]: {}".format(
+                    self.remote_id, self.remote_ip),
+                system=self.factory.proxy.tag)
+            self.factory.proxy.router.neighbourChange(self.remote_id, True)
+            if self.remote_id not in self.factory.peers:
+                self.factory.peers[self.remote_id] = self
+        self.factory.proxy.messageReceived(message)
+
 
 
 class ServerFactory(Factory):
