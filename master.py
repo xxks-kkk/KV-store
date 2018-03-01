@@ -63,8 +63,8 @@ def stabilize(dogs, clients, servers, arg):
                 break
         if finished:
             break
-        time.sleep(0.5)
-        i += 0.5
+        time.sleep(config.STABILIZE_INTERVAL)
+        i += config.STABILIZE_INTERVAL
     print("stabilized after {} second.".format(i))
 
 def printStore(dogs, clients, servers, arg):
@@ -76,8 +76,9 @@ def printStore(dogs, clients, servers, arg):
                print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
                print("Ground Truth: {}".format(kv_store[key][0:20]))
                return 
-    for k, v in disKvStore.items():
-        print "{}:{}".format(k, v)
+    if config.DISPLAY_COMMAND:
+        for k, v in disKvStore.items():
+            print "{}:{}".format(k, v)
     # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
