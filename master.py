@@ -74,12 +74,15 @@ def stabilize(dogs, clients, servers, arg):
 def printStore(dogs, clients, servers, arg):
     disKvStore = servers[int(arg[1])].printStore()
     if config.debug:
-        for key in kv_store:
-            if key not in disKvStore or disKvStore[key] != kv_store[key]:
-               print('On the server %s the key %s has a wrong value' % (arg[1], key))
-               print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
-               print("Ground Truth: {}".format(kv_store[key][0:20]))
-               return 
+        if int(arg[1]) == 0:
+            kv_store = disKvStore
+        else:
+            for key in kv_store:
+                if key not in disKvStore or disKvStore[key] != kv_store[key]:
+                    print('On the server %s the key %s has a wrong value' % (arg[1], key))
+                    print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
+                    print("Ground Truth: {}".format(kv_store[key][0:20]))
+                    return 
     if config.DISPLAY_COMMAND:
         for k, v in disKvStore.items():
             print "{}:{}".format(k, v)
@@ -119,7 +122,6 @@ if __name__ == "__main__":
     start = time.time()
     commandCount = 0
 
-    # kv_store = pickle.load(open('commandConnected_40' ,'r'))
 
     while True:
         input = sys.stdin.readline().strip('\n')
@@ -134,8 +136,6 @@ if __name__ == "__main__":
         func = command2func.get(arg[0], None)
         if func:
             func(dogs, clients, servers, arg)
-            if config.debug and arg[0] == 'put':
-                kv_store[arg[2]] = arg[3]
         else:
             continue
 
