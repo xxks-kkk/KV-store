@@ -1,4 +1,4 @@
-# "Daadkvs" as a Distributed Key-Value Store
+# *Daadkvs* as a Distributed Key-Value Store
 
 We implement a distributed key-value store called *Daadkvs* (**D**aadkvs **a**s **a** 
 **D**istributed **K**ey-**V**alue **S**tore). *Daadkvs* implements an eventually consistency model.
