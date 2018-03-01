@@ -33,8 +33,8 @@ GOSSIP_INTERVAL = 0.2
 # time period we resend the message to the server that hasn't ACK our message
 RESEND_INTERVAL = 1
 STABILIZE_INTERVAL = 0.1
-JOIN_SERVER_CHECK_INTERVEL = 0.1
-DISPLAY_COMMAND = True
+CHECK_INTERVAL = 0.1
+DISPLAY_COMMAND = False
 # Error message
 KEY_ERROR = "ERR_KEY"
 ERR_DEP = "ERR_DEP"
