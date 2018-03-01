@@ -189,15 +189,20 @@ class ServerRPC(xmlrpc.XMLRPC):
 
     def xmlrpc_breakConnection(self, cid):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
+        log.msg("Received command to break with Server[{}].".format(cid), system=self.proxy.tag)
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
-            peer.transport.abortConnection()
+            peer.transport.loseConnection()
         else:
             log.msg(
                 "Connection haven't established with server {}".format(cid),
                 self.proxy.tag)
         return 0
+
+    def xmlrpc_isConnectedTo(self, serverId):
+        status = serverId in self.proxy.factory.peers
+        return status
 
     def xmlrpc_status(self, on_machines):
         return self.proxy.model.status(on_machines)
