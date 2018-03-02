@@ -11,23 +11,23 @@ commands = ['joinServer' ,
             'joinClient' ,
             'breakConnection' ,
             'createConnection' ,
-            'stablize' ,
+            'stabilize' ,
             'printStore', 
             'put' ,
             'get' ]
 
-command_Nums = 4000
+command_Nums = 5000
 key = list('abcdefghijklmnopqrstuvwxyz1234567890')
 clientid = list('56789')
 chars = '1234567890qwertyuiopasdfghjklzxcvbnm'
 lenchars = len(chars)
-low = 5000
-high = 8000
+low = 8000
+high = 10000
 longerkeys = [i + j  + k for i in key for j in key for k in key]
 
 kv_store = {}
 
-with open('commandComplexHuge.txt', 'w') as f:
+with open('commandPartition.txt', 'w') as f:
     #  use 3 servers at first
     for i in range(3):
         f.write("joinServer %d\n" % (i))
@@ -71,7 +71,7 @@ with open('commandComplexHuge.txt', 'w') as f:
 
         f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
 
-    f.write('breakConnection 0 2\nbreakConnection 0 3\nbreakConnection 0 4\nbreakConnection 1 3\nbreakConnection 1 4\nbreakConnection 2 4\n')
+    f.write('breakConnection 0 2\nbreakConnection 0 3\nbreakConnection 0 4\nbreakConnection 1 3\nbreakConnection 1 4\nbreakConnection 2 4\nbreakConnection 2 3\n')
 
     for _ in range(command_Nums ):
         length = random.randint(low,high)

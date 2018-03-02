@@ -22,14 +22,12 @@ class Log:
 
     def load(self):
         with open(self.filepath, 'r') as f:
-            json_str = json.load(f)
-            data = json.loads(json_str)
+            data = json.load(f)
         return data
 
     def dump(self):
         with open(self.filepath, 'w') as f:
-            json_str = json.dumps(self.data)
-            json.dump(json_str, f)
+            json.dump(self.data, f, indent=4)
 
     def __contains__(self, item):
         """

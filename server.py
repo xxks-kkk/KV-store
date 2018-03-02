@@ -108,11 +108,8 @@ class ServerProxy(object):
 
     def onShutDown(self):
         # When we receive SIGINT, we save the data from the memory to disk
-        log.msg("Recieved signal - SIGTERM", system=self.tag)
-        log.msg("Dumping ...", system=self.tag)
         self.model.dump()
         self.timeStamp.dump()
-        log.msg("Shutting down ...", system=self.tag)
 
 
 class ServerProtocol(LineReceiver):
@@ -197,7 +194,6 @@ class ServerRPC(xmlrpc.XMLRPC):
 
     def xmlrpc_breakConnection(self, cid):
         self.proxy.timeStamp.incrementClock(self.proxy.serverId)
-        log.msg("Received command to break with Server[{}].".format(cid), system=self.proxy.tag)
         cid = int(cid)
         if cid in self.proxy.factory.peers:
             peer = self.proxy.factory.peers[cid]
@@ -262,8 +258,8 @@ if __name__ == '__main__':
         nargs=5,
         help="server ids this server to connect to")
     (options, args) = parser.parse_args()
-    # log.startLogging(open("server_log/{}.log".format(options.serverId), 'w'))
-    log.startLogging(config.LOG_FILE)
+    log.startLogging(open("server_log/{}.log".format(options.serverId), 'w'))
+    # log.startLogging(config.LOG_FILE)
     host, listenPort, _ = config.ADDR_PORT[options.serverId]
     proxy = ServerProxy(options.serverId)
     serverEndpoint = endpoints.TCP4ServerEndpoint(reactor, listenPort + 500)
