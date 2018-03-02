@@ -68,9 +68,21 @@ when one server is killed and revived later.
 
 ## Protocol
 
+Our eventual consistency is implemented through gossip. Whenever a server receives a put from external,
+`put` routine inside *Model* get invoked inside `xmlrpc_put` from *Servers*. Inside `put`, we put the
+key-value pair inside the write log and start to send message to its peer servers using the infrastructure
+provided by *Servers*. Write log is used to keep track of whether a key-value pair has been successfully
+propagated to the rest servers. If it is, we delete the pair from the write log.
+ 
+For the peer server, whenever we receive a message from peers, we check if the message's target server
+(`ReceiverId`) is ours. If it is, we invoke *Model*'s `put_internal` routine to update the local key-value pair
+and at the same time, send out the "ACK" message back to the sender. Otherwise, we redirect the message
+to other peers based on the information provided by the router.
 
-
-
+Beyond handling the key-pair, the protocol also periodically send out the heart beat message (`greeting` in *Servers*) 
+to the peers based on the router information. In addition, we exchange the topology of the networks (i.e., 
+neighbors that each server can connect) through message with type `"Gossip"` .
+ 
 ## Tests and Performance
 
 
