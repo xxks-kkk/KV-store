@@ -16,6 +16,10 @@ In addition, we provide two session guarantees:
 
 ## Implementation
 
+The architecture of our implementation is shown in [architecture graph][architecture] below. 
+
+![architecture](img/architecture.png)
+
 
 ## Protocol
 
