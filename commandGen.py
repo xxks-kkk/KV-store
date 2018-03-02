@@ -16,18 +16,18 @@ commands = ['joinServer' ,
             'put' ,
             'get' ]
 
-command_Nums = 50
+command_Nums = 4000
 key = list('abcdefghijklmnopqrstuvwxyz1234567890')
 clientid = list('56789')
 chars = '1234567890qwertyuiopasdfghjklzxcvbnm'
 lenchars = len(chars)
-low = 1600
-high = 2000
+low = 5000
+high = 8000
 longerkeys = [i + j  + k for i in key for j in key for k in key]
 
 kv_store = {}
 
-with open('commandComplexTiny.txt', 'w') as f:
+with open('commandComplexHuge.txt', 'w') as f:
     #  use 3 servers at first
     for i in range(3):
         f.write("joinServer %d\n" % (i))
