@@ -88,6 +88,7 @@ neighbors that each server can connect) through message with type `"Gossip"` .
 
 ## How to use our system
 
+- Install the dependency through `make setup`
 
 ## Authors (listed in alphabetical order of last name)
 
