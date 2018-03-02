@@ -20,7 +20,7 @@ The architecture of our implementation is shown in image below. In the picture, 
 of the code (i.e., *Master*, *Clients*) are represented by the boxes. The actual source code files
 are listed under the module names inside parentheses. The commands are associated with colors of the modules.
 For instance, the "Put" command is supported by *Clients* module (i.e., "client.py") and 
-*Servers* module (i.e., "server.py"). The semantics of the commands are shown in the table following afterwards. 
+*Servers* module (i.e., "server.py"). The semantics of the commands are shown in the table following afterward. 
 
 ![architecture](img/architecture.png)
 
