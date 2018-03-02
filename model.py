@@ -45,7 +45,8 @@ class Model:
         timeStamp = item['timeStamp']
         serverId = item['serverId']
         messageId = item['messageId']
-        if key not in self.fileDict or clock.isHappenBefore(self.serverProxy.serverId,
+        # log.msg("Key [{}] received[internal]: {}".format(key, item), system=self.serverProxy.tag)
+        if key not in self.fileDict or clock.isHappenBefore(self.fileDict[key]['serverId'],
                                                          clock.Clock(self.fileDict[key]['timeStamp']),
                                                          serverId,
                                                          clock.Clock(timeStamp)):
@@ -83,6 +84,7 @@ class Model:
         """
         id = str(uuid.uuid1())
         item['messageId'] = id
+        # log.msg("Key {} received: {}".format(item["key"], item))
         with suspended_signals(SIGKILL, SIGINT, SIGTERM):
             # Signals (SIGKILL, SIGINT, SIGTERM) are blocked here
             self.fileDict.put(item)
@@ -106,6 +108,7 @@ class Model:
             return config.ERR_DEP
 
     def status(self, on_machines):
+        # log.msg("Status called with {}.".format(on_machines), system=self.serverProxy.tag)
         for messageId in self.writeLog:
             receiptVector = self.writeLog[messageId][self.RECEIPT_IDX]
             for i, stat in enumerate(on_machines):
@@ -116,6 +119,7 @@ class Model:
     def dump(self):
         # We save the fildDict and writeLog to the disk
         self.fileDict.dump()
+        self.successLog.dump()
         self.writeLog.dump()
 
     def resend(self):
