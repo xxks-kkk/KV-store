@@ -1,7 +1,7 @@
 import sys
 
-WATCHDOG_PORT = 6666
-# WATCHDOG_PORT = [6666, 6667, 6668, 6669, 6670]
+# Doing this allows us to have a unified code in master main for both single/multiple test sceanrios
+WATCHDOG_PORT = [6666, 6666, 6666, 6666, 6666]
 # CLIENT_PORT = 8888
 CLIENT_PORT = [9001, 9002, 9003, 9004, 9005]
 SERVER_PORT = [8000, 8001, 8002, 8003, 8004]
