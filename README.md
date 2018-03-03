@@ -1,5 +1,7 @@
 # *Daadkvs* as a Distributed Key-Value Store
 
+**NOTE**: This README is best viewed at https://github.com/xxks-kkk/KV-store/edit/master/README.md
+
 We implement a distributed key-value store called *Daadkvs* (**D**aadkvs **a**s **a** 
 **D**istributed **K**ey-**V**alue **S**tore). *Daadkvs* implements an eventually consistency model.
 Each entry in the store will be a pair of binary strings. The system will consist of clients and servers.
@@ -139,7 +141,7 @@ the project directory, then run "python watchdog -p {WATCHDOG\_PORT}" (server wi
 
 **NOTE:**
 - You can always kill all the servers by running `python master.py < tests/command-cleanUpServers.txt`
-- You can cleanup code base by running `make clean`
+- You can clean up code base by running `make clean`
 
 
 ## Authors (listed in alphabetical order of last name)
