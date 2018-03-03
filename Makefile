@@ -24,3 +24,11 @@ install:
 	mkdir server_log
 	@echo "Generating large test cases ..."
 	$(PYTHON) commandGen.py
+
+# Change the configuration to the single machine test scenario
+single:
+	@patch < single.patch
+
+# Change the configuration to the multiple machines test scenario
+multiple:
+	@patch < multiple.patch
