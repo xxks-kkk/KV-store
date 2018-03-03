@@ -10,5 +10,6 @@ clean:
 	rm -rf *.pyc
 	rm -rf __pycache__
 
-setup:
-	$(PYTHON) -m pip install -r --user --upgrade requirements.txt
+install:
+	$(PYTHON) -m pip install -r requirements.txt
+	mkdir server_log
