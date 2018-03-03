@@ -98,6 +98,22 @@ to give itself with a up-to-date view of the network topology.
  
 ## Tests and Performance
 
+Our sytem is designed towards a scenario that there are five clients and each of them will connect to one
+of five servers. The clients will rotate issuing put requests and then "stabilize" command will be invoked
+at the end.
+
+We design two test environments and the test results are reported in the table below.
+
+- Single machine: we spawn all clients and servers on a single machine and we issue the commands from the pre-generated 
+test cases (using "commandGen.py").
+
+- Multiple machines: we use 10 machines with each machine hosts a server or a client. We issue the commands
+from the pre-generated test cases (using "commandGen.py").
+
+We use UTCS lab machines: Intel Xeon 3.60GHz CPU with 16 GB RAM, 240 GB SATA Disk with Ubuntu 16.04.3 LTS 
+to conduct all of our tests.
+
+
 | Test case (command) | Test Description         | Test Environment  | Workload               | Throughput             |
 |---------------------|--------------------------|-------------------|------------------------|------------------------|
 | The file name       | The purpose of this test | Single / multiple | how much data we used? | what's the throughput? |
@@ -129,4 +145,4 @@ the project directory, then run "python watchdog -p {WATCHDOG\_PORT}" (server wi
 
 - Jianwei Chen @JianweiCxyz (UT EID: jc83978 UTCS id: jwchen)
 - Zeyuan Hu @xxks-kkk (UT EID: zh4378 UTCS id: zeyuanhu)
-- Wei Sun @sunwell1994 (UT EID: ; UTCS id: )
+- Wei Sun @sunwell1994 (UT EID: ws8699; UTCS id:weisun )
