@@ -41,5 +41,5 @@ DISPLAY_COMMAND = True
 # Error message
 KEY_ERROR = "ERR_KEY"
 ERR_DEP = "ERR_DEP"
-DEBUG = True
+DEBUG = False
 

@@ -4,11 +4,23 @@
 
 PYTHON=python
 
+# suppress the core dump error raised from installing server_identity package
+define EXPECTED_FAIL
+if ! { $1 ; } 2>$@.temp; then \
+    echo EXPECTED FAILURE: ; cat $@.temp; \
+fi
+endef
+
+
 clean:
 	rm -rf dict/
 	rm -rf log/
 	rm -rf *.pyc
 	rm -rf __pycache__
+	rm -rf server_log
 
-setup:
-	$(PYTHON) -m pip install -r --user --upgrade requirements.txt
+install:
+	$(call EXPECTED_FAIL, $(PYTHON) -m pip install -r requirements.txt)
+	mkdir server_log
+	@echo "Generating large test cases ..."
+	$(PYTHON) commandGen.py
