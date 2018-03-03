@@ -121,4 +121,4 @@ to conduct all of our tests.
 
 - Jianwei Chen @JianweiCxyz (UT EID: UTCS id: jc83978)
 - Zeyuan Hu @xxks-kkk (UT EID: zh4378 UTCS id: zeyuanhu)
-- Wei Sun @sunwell1994 (UT EID: ; UTCS id: )
+- Wei Sun @sunwell1994 (UT EID: ws8699; UTCS id:weisun )
