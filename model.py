@@ -119,7 +119,6 @@ class Model:
     def dump(self):
         # We save the fildDict and writeLog to the disk
         self.fileDict.dump()
-        self.successLog.dump()
         self.writeLog.dump()
 
     def resend(self):
