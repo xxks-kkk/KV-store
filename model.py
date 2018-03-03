@@ -90,9 +90,9 @@ class Model:
             self.fileDict.put(item)
             self.writeLog[id] = ["put", item, list(self.receiptVector)]
         # Any pending signal is fired now ...
-        for i in range(config.NUM_SERVER):
-            if i != self.serverProxy.serverId:
-                self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
+#        for i in range(config.NUM_SERVER):
+#            if i != self.serverProxy.serverId:
+#                self.serverProxy.sendMessage({"ReceiverId": i, "MessageId": id, "Method": "Put", "Payload": item})
                 # "Payload" means the content send to the network
 
     def get(self, key, timeStamp):
