@@ -27,7 +27,7 @@ longerkeys = [i + j  + k for i in key for j in key for k in key]
 
 kv_store = {}
 
-with open('commandPartition.txt', 'w') as f:
+with open('tests/commandPartition.txt', 'w') as f:
     #  use 3 servers at first
     for i in range(3):
         f.write("joinServer %d\n" % (i))
@@ -98,15 +98,15 @@ with open('commandPartition.txt', 'w') as f:
         f.write("joinServer %d\n" % (i))
         f.write("joinClient %d %d\n" % (i + 5, i))
 
-    for _ in range(command_Nums  ):
-        length = random.randint(low,high)
-        k = longerkeys[random.randint(0, len(longerkeys) - 1)]
-        c = ''
-        for i in range(length):
-            c += chars[random.randint(0, lenchars - 1)]
+    # for _ in range(command_Nums  ):
+    #     length = random.randint(low,high)
+    #     k = longerkeys[random.randint(0, len(longerkeys) - 1)]
+    #     c = ''
+    #     for i in range(length):
+    #         c += chars[random.randint(0, lenchars - 1)]
 
 
-        f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
+    #     f.write('put ' + clientid[random.randint(0,4)] + ' ' + k + ' ' + c + '\n')
 
     f.write("stabilize\n")
 

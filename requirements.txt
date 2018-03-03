@@ -1,2 +1,3 @@
 twisted
 pysigset
+service_identity
