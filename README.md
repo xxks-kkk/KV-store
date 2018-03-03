@@ -42,22 +42,22 @@ The functionality of each module is following:
 The master program will keep track of and will also send command messages to all servers and
 clients. More specifically, the master program will read a sequence of newline delineated
 commands from standard input ending with EOF which will interact with the key-value store and,
-when instructed to, will display output from the playlist to standard out.
+when instructed to, will display output from the playlist to standard output.
 
 - *Clients*: clients program that invoked by the mater program and perform corresponding commands.
-All the commands are implemented using RPC calls. In addition, clients store the vector clock of the 
+All the commands are implemented using RPC calls. In addition, clients cache the vector clock of the 
 "Put" command to support *Read Your Writes*.
 
 - *Watch dogs*: each server is guarded by a watch dog which takes command from the master to join the server
-he guarded to the network or kill the server.
+he guarded to the network or kill the server process.
 
-- *Router*: each server gets a router which is used to find all the available servers that the current
-server can reach.
+- *Router*: each server gets a router which periodically receive information about the current network topology,
+ it is used to find the path to all the available servers that the current server can reach.
 
 - *Servers*: server works as a RPC server to the clients and works with *Model* to implement the gossip
-proctol (i.e., send message and receive message to other servers)
+proctol and handle message passing between servers.
 
-- *Model*: model implements the actual dirty work of the command. Specifically, the module implements
+- *Model*: model implements the actual protocol of the system. Specifically, the module implements
 what string to return on "printStore", what to do on "put", and what to return to the requesters on "get".
 
 - *Vector Clock*: as name suggested, the module implements the vector clock and decide the "happen-before"
@@ -68,20 +68,33 @@ when one server is killed and revived later.
 
 ## Protocol
 
-Our eventual consistency is implemented through gossip. Whenever a server receives a put from external,
-`put` routine inside *Model* get invoked inside `xmlrpc_put` from *Servers*. Inside `put`, we put the
-key-value pair inside the write log and start to send message to its peer servers using the infrastructure
-provided by *Servers*. Write log is used to keep track of whether a key-value pair has been successfully
-propagated to the rest servers. If it is, we delete the pair from the write log.
+Our eventual consistency is implemented through vector clocks and guaranteed delivery (whenever possible). 
+Whenever a server receives a put from clients, `put` routine inside *Model* get invoked inside `xmlrpc_put` 
+from *Servers*. Inside `put`, we put the key-value pair inside the write log and start to send "Put" message 
+to its peer servers using the infrastructure provided by *Servers*. Each server is responsible for managing its own "put" and propagate them to
+all other servers. Therefore, each server manage a write log, it is used to keep track of whether a key-value pair 
+has been successfully propagated to the rest servers. We implement this machanism by having each server receiving 
+the internal "Put" message return an "Ack" to its sender. If a message is acked by all its peer servers, we delete 
+the entry from the write log. The server periodically checks its write log and resend "Put" message to its peer servers
+in case of network partition and node failure.
  
-For the peer server, whenever we receive a message from peers, we check if the message's target server
-(`ReceiverId`) is ours. If it is, we invoke *Model*'s `put_internal` routine to update the local key-value pair
-and at the same time, send out the "ACK" message back to the sender. Otherwise, we redirect the message
-to other peers based on the information provided by the router.
+There are three type of internal message among the servers. 
 
-Beyond handling the key-pair, the protocol also periodically send out the heart beat message (`greeting` in *Servers*) 
-to the peers based on the router information. In addition, we exchange the topology of the networks (i.e., 
-neighbors that each server can connect) through message with type `"Gossip"` .
+The first message type is "Put" (This different from the xmlrpc\_put interface provided to client). For the peer 
+server, whenever we receive a message from peers, we check if the message's target server
+(`ReceiverId`) is itself. If it is, we invoke *Model*'s `put_internal` routine. This routine check if the K-V pair
+is more recent than its current K-V pair by the corresponding (server\_id, vector\_clock) pair. If we receive a more recent
+K-V value, we update the local key-value pair in local storage. Under both conditions, send out the "ACK" message back to 
+the server that receive. Otherwise, we redirect the message to other peers based on the information provided by the router.
+
+The second message type is "Ack", this message is sent when other servers receives "Put" message from it. On receiving such
+message, server set the corresponding bit of the receiptVector from the write log. If all five bits of the receiptVector are set,
+the entry is removed from write log.
+
+Beyond handling the "Put" and "Ack", the protocol also periodically send out heart beat messages (`Gossip` in *Servers*) 
+to the peers with its current knowlege of system time (clocks). In addition, we exchange the topology of the networks (i.e., 
+neighbors that each server can connect) through message with type `"Gossip". The messages are feed into routers module
+to give itself with a up-to-date view of the network topology.
  
 ## Tests and Performance
 
@@ -116,9 +129,20 @@ to conduct all of our tests.
 ## How to use our system
 
 - Install the dependency through `make setup`
+- The server ids should be named by integer 0 - 9. 0 - 4 is server ids and 5 - 9 is client ids. Inside config.py set the five
+client and server rpc port in the variable ADDR\_PORT, its content should be self explanatory. You should also set the 5 port
+for server watchdog to listen to master command.
+- open a terminal on each machine or multiple terminal window on the same machine. On the five server terminal, set cwd to 
+the project directory, then run "python watchdog -p {WATCHDOG\_PORT}" (server will be started by watchdog when requested from
+ master). On the five client terminal, set cwd to the project directory, then run "python client -p {CLIENT\_PORT}". CLIENT\_PORT
+ and SERVER\_PORT should be consistent with the information recorded in config.py.
+- Open another terminal in the same network (could be one of the servers or clients), set cwd to the project directory, type
+"python master.py". Then the program will wait for your input from STDIN with commands specified by the API specification.
+- To expedite testing, we can redirect test script from stdin to the master program by typing "python master.py < {PATH\_TO\_TEST\_SCRIPT}".
+
 
 ## Authors (listed in alphabetical order of last name)
 
-- Jianwei Chen @JianweiCxyz (UT EID: UTCS id: jc83978)
+- Jianwei Chen @JianweiCxyz (UT EID: jc83978 UTCS id: jwchen)
 - Zeyuan Hu @xxks-kkk (UT EID: zh4378 UTCS id: zeyuanhu)
 - Wei Sun @sunwell1994 (UT EID: ws8699; UTCS id:weisun )
