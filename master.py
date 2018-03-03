@@ -86,9 +86,8 @@ def printStore(dogs, clients, servers, arg):
                     print('On the server %s the key %s has a wrong value' % (arg[1], key))
                     print("Remote Value: {}".format(disKvStore[key][0:20] if key in disKvStore else None) )
                     print("Ground Truth: {}".format(kv_store[key][0:20]))
-    if config.DISPLAY_COMMAND:
-        for k, v in disKvStore.items():
-            print "{}:{}".format(k, v)
+    for k, v in disKvStore.items():
+        print "{}:{}".format(k, v)
     # print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
@@ -144,6 +143,6 @@ if __name__ == "__main__":
             continue
 
     allTime = time.time() - start
-    print allTime
+    print ("Time to execute all commands: {}".format(allTime))
     print('throughput is %f requests per second' % (commandCount / allTime))
 
