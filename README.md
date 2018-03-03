@@ -107,11 +107,13 @@ at the end.
 We design two test environments and the test results are reported in the table below. We list all test cases
 and report the performance only on the benchmark test cases.
 
-- Single machine: we spawn all clients and servers on a single machine and we issue the commands from the pre-generated 
+- *Single* machine: we spawn all clients and servers on a single machine and we issue the commands from the pre-generated 
 test cases (using "commandGen.py").
 
-- Multiple machines: we use 10 machines with each machine hosts a server or a client. We issue the commands
+- *Multiple* machines: we use 10 machines with each machine hosts a server or a client. We issue the commands
 from the pre-generated test cases (using "commandGen.py").
+
+**NOTE:** Based on the ip addresses, we choose 10 machines that across computer labs at different locations in GDC.
 
 We use UTCS lab machines: Intel Xeon 3.60GHz CPU with 16 GB RAM, 240 GB SATA Disk with Ubuntu 16.04.3 LTS 
 to conduct all of our tests.
@@ -120,11 +122,16 @@ to conduct all of our tests.
 | Test case                | Test Description                                                                                                                                                                                                                                           | Test Environment | Workload       | Data Size | Throughput               |
 |--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|----------------|-----------|--------------------------|
 | command-tree-4000.txt    | All the servers are connected in a tree structure. It is used to test the *Router* module                                                                                                                                                                  | Single           | 4026 commands  | 3.1M      | 351.84 requests / second |
+| command-tree-4000.txt    | All the servers are connected in a tree structure. It is used to test the *Router* module                                                                                                                                                                  | Multiple         | 4026 commands  | 3.1M      | 61.92  requests / second |
 | command{1-15}.txt        | Basic module logic tests                                                                                                                                                                                                                                   | Single           | NA             | NA        | NA                       |
 | command{21-24}-4000.txt  | Basic module logic tests in heavy workloads                                                                                                                                                                                                                | Single           | 4026 commands  | 3.1M      | NA                       |
 | commandComplex.txt       | Make the servers in chain topology; add server one by one and test whether a newly-joined server can get the data from other servers asynchronously; kill one of servers and let it rejoin the network and see whether we can achieve eventual consistency | Single           | 9031 commands  | 16M       | 367.13 requests / second |
+| commandComplex.txt       | Make the servers in chain topology; add server one by one and test whether a newly-joined server can get the data from other servers asynchronously; kill one of servers and let it rejoin the network and see whether we can achieve eventual consistency | Multiple         | 9031 commands  | 16M       | 51.42 requests / second  |
 | commandPartitionTiny.txt | Create the network partition among servers and then reform the fully-connected network. It is used to test out the eventual consistency model when network partition happens.                                                                              | Single           | NA             | NA        | NA                       |
 | commandPartition.txt     | Benchmark version for commandPartitionTiny.txt                                                                                                                                                                                                             | Single           | 25032 commands | 215M      | 292.02 requests / second |
+| commandPartition.txt     | Benchmark version for commandPartitionTiny.txt                                                                                                                                                                                                             | Multiple         | 25032 commands | 215M      | 43.70 requests / second  |
+
+**NOTE:** "Put" data binary size around 8000-10000 bytes in "commandPartition.txt" test case while "Put" in other test cases is capped at 2000 bytes.
 
 ## How to use our system
 
@@ -141,9 +148,10 @@ the project directory, then run "python watchdog -p {WATCHDOG\_PORT}" (server wi
 - To expedite testing, we can redirect test script from stdin to the master program by typing "python master.py < {PATH\_TO\_TEST\_SCRIPT}".
 
 **NOTE:**
-- You can always kill all the servers by running `python master.py < tests/command-cleanUpServers.txt`
-- You can clean up code base by running `make clean`
-
+- You can always kill all the servers by running `python master.py < tests/command-cleanUpServers.txt`.
+- You can clean up code base by running `make clean`.
+- To test out the *Single* machine environment, run `make single` before the test. This will setup "config.py" to the single machine test environment.
+- To test out the *Multiple* machines environment, run `make multiple` before the test. This will setup "config.py" to the multiple machines test environment.
 
 ## Authors (listed in alphabetical order of last name)
 
