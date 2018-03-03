@@ -13,16 +13,16 @@ SUCCESS_LOG = "S" # Success log
 NUM_SERVER = 5
 
 ADDR_PORT = {
-    "0": ("localhost", 8000, "server"),
-    "1": ("localhost", 8001, "server"),
-    "2": ("localhost", 8002, "server"),
-    "3": ("localhost", 8003, "server"),
-    "4": ("localhost", 8004, "server"),
-    "5": ("localhost", 9001, "client"),
-    "6": ("localhost", 9002, "client"),
-    "7": ("localhost", 9003, "client"),
-    "8": ("localhost", 9004, "client"),
-    "9": ("localhost", 9005, "client"),
+    "0": ('128.83.139.248', 8000, "server"),
+    "1": ('128.83.130.139', 8001, "server"),
+    "2": ('128.83.120.63', 8002, "server"),
+    "3": ('128.83.139.77', 8003, "server"),
+    "4": ('128.83.139.114', 8004, "server"),
+    "5": ('128.83.139.250', 9001, "client"),
+    "6": ('128.83.139.78', 9002, "client"),
+    "7": ('128.83.130.140', 9003, "client"),
+    "8": ('128.83.130.142', 9004, "client"),
+    "9": ("128.83.144.59", 9005, "client"),
 }
 
 SERVER_COUNT = 5
@@ -37,7 +37,7 @@ GOSSIP_INTERVAL = 0.2
 RESEND_INTERVAL = 1
 STABILIZE_INTERVAL = 0.1
 CHECK_INTERVAL = 0.1
-DISPLAY_COMMAND = False
+DISPLAY_COMMAND = True
 # Error message
 KEY_ERROR = "ERR_KEY"
 ERR_DEP = "ERR_DEP"
