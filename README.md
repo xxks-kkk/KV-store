@@ -125,7 +125,7 @@ to conduct all of our tests.
 
 ## How to use our system
 
-- Install the dependency through `make setup`
+- Install the dependency through `make install`
 - The server ids should be named by integer 0 - 9. 0 - 4 is server ids and 5 - 9 is client ids. Inside config.py set the five
 client and server rpc port in the variable ADDR\_PORT, its content should be self explanatory. You should also set the 5 port
 for server watchdog to listen to master command.
@@ -136,6 +136,10 @@ the project directory, then run "python watchdog -p {WATCHDOG\_PORT}" (server wi
 - Open another terminal in the same network (could be one of the servers or clients), set cwd to the project directory, type
 "python master.py". Then the program will wait for your input from STDIN with commands specified by the API specification.
 - To expedite testing, we can redirect test script from stdin to the master program by typing "python master.py < {PATH\_TO\_TEST\_SCRIPT}".
+
+**NOTE:**
+- You can always kill all the servers by running `python master.py < tests/command-cleanUpServers.txt`
+- You can cleanup code base by running `make clean`
 
 
 ## Authors (listed in alphabetical order of last name)
