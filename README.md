@@ -101,17 +101,14 @@ We use UTCS lab machines: Intel Xeon 3.60GHz CPU with 16 GB RAM, 240 GB SATA Dis
 to conduct all of our tests.
 
 
-| Test case (command) | Test Description         | Test Environment  | Workload               | Throughput             |
-|---------------------|--------------------------|-------------------|------------------------|------------------------|
-| The file name       | The purpose of this test | Single / multiple | how much data we used? | what's the throughput? |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
-|                     |                          |                   |                        |                        |
+| Test case (command)      | Test Description                                                                                                                                                                                                                                           | Test Environment | Workload       | Data Size | Throughput               |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|----------------|-----------|--------------------------|
+| command-tree-4000.txt    | All the servers are connected in a tree structure. It is used to test the *Router* module                                                                                                                                                                  | Single           | 4026 commands  | 3.1M      | 351.84 requests / second |
+| command{1-15}.txt        | Basic module logic tests                                                                                                                                                                                                                                   | Single           | NA             | NA        | NA                       |
+| command{21-24}-4000.txt  | Basic module logic tests in heavy workloads                                                                                                                                                                                                                | Single           | 4026 commands  | 3.1M      | NA                       |
+| commandComplex.txt       | Make the servers in chain topology; add server one by one and test whether a newly-joined server can get the data from other servers asynchronously; kill one of servers and let it rejoin the network and see whether we can achieve eventual consistency | Single           | 9031 commands  | 16M       | 367.13 requests / second |
+| commandPartitionTiny.txt | Create the network partition among servers and then reform the fully-connected network. It is used to test out the eventual consistency model when network partition happens.                                                                              | Single           | NA             | NA        | NA                       |
+| commandPartition.txt     | Benchmark version for commandPartitionTiny.txt                                                                                                                                                                                                             | Single           | 25032 commands | 215M      | 292.02 requests / second |
 
 ## How to use our system
 
