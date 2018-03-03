@@ -18,3 +18,7 @@ dict/
 .idea
 log/
 server_log/*
+
+*.txt
+
+*.txt
