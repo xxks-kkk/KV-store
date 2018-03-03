@@ -7,9 +7,6 @@ import json
 
 def isHappenBefore(serverId1, c1, serverId2, c2):
     # c2 is sender and c1 is receiver
-    for i in range(config.NUM_SERVER):
-        if c1.vector_clock[i] < c2.vector_clock[i]:
-            c1.vector_clock[i] = c2.vector_clock[i]
     if all([i <= j for i, j in zip(c1.vector_clock, c2.vector_clock)]):
         return True
     elif all([i >= j for i, j in zip(c1.vector_clock, c2.vector_clock)]):
