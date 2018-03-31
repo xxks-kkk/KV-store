@@ -57,7 +57,8 @@ def createConnection(dogs, clients, servers, arg):
     if id1 < config.SERVER_COUNT and id2 < config.SERVER_COUNT:
         servers[id1].createConnection(id2)
     else:
-        clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
+        # clients[max(id1, id2) % config.CLIENT_COUNT].createConnection(min(id1, id2))
+        clients[max(id1, id2) % config.CLIENT_COUNT].joinClient(min(id1, id2))
 
 def stabilize(dogs, clients, servers, arg):
     i = 0
