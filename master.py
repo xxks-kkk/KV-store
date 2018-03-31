@@ -89,7 +89,8 @@ def printStore(dogs, clients, servers, arg):
                     print("Ground Truth: {}".format(kv_store[key][0:20]))
     for k, v in disKvStore.items():
         print "{}:{}".format(k, v)
-    print servers[int(arg[1])].printStore()
+    if config.DEBUG:
+        print servers[int(arg[1])].printStore()
 
 def put(dogs, clients, servers, arg):
     # what happens if there are ' ' in key and value

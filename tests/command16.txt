@@ -1,0 +1,12 @@
+joinServer 0
+joinServer 1
+joinClient 5 0
+put 5 kk vv
+printStore 0
+printStore 1
+breakConnection 5 0
+createConnection 5 1
+get 5 kk
+killServer 0
+killServer 1
+# test printStore
